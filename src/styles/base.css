@@ -1,0 +1,262 @@
+/* ---- reset + base ---- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  background: var(--base-bd-background-color);
+  color: var(--base-text-color);
+  font-family: var(--font-bodyf);
+  font-size: 16px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-headerf);
+  font-weight: normal;
+  letter-spacing: 0.4px;
+  margin: 0 0 0.4em;
+  line-height: 1.15;
+}
+
+p {
+  margin: 0 0 0.6em;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+img {
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus-color);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--box-color-standard) 60%, transparent);
+}
+
+/* Thin scrollbars in the theme colors. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--box-color-standard) var(--base-bd-background-color);
+}
+
+/* ---- app shell ---- */
+.app {
+  width: 100%;
+  max-width: var(--panel-max);
+  margin: 0 auto;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.app-main {
+  flex: 1;
+  min-width: 0;
+  padding: 4px;
+}
+
+.app-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  justify-content: center;
+  padding: 16px 8px 8px;
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+/* ---- top bar ---- */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  margin-bottom: 8px;
+  background: var(--base-background-color);
+  border-radius: var(--radius);
+  box-shadow:
+    0 0 0 4px var(--box-color-standard),
+    6px 6px 0 0 color-mix(in srgb, var(--box-color-standard) 50%, transparent);
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-headerf);
+    font-size: clamp(18px, 4.5vw, 24px);
+    line-height: 1;
+    white-space: nowrap;
+
+    .brand-mark {
+      color: var(--box-color-standard);
+    }
+  }
+
+  .topbar-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .topbar-nav {
+    display: none;
+    align-items: center;
+    gap: 2px;
+    margin-left: 12px;
+
+    .nav-link {
+      padding: 6px 10px;
+      border-radius: var(--radius);
+      font-size: 14px;
+
+      &:hover {
+        text-decoration: none;
+        background: color-mix(in srgb, var(--box-color-standard) 35%, transparent);
+      }
+
+      &.active {
+        background: var(--box-color-standard);
+        color: var(--base-background-color);
+      }
+    }
+  }
+
+  @media (min-width: 720px) {
+    .topbar-nav {
+      display: flex;
+    }
+    .menu-toggle {
+      display: none;
+    }
+  }
+}
+
+/* ---- utilities ---- */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.muted {
+  opacity: 0.7;
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.text-end {
+  text-align: end;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 16px;
+  opacity: 0.7;
+}
+
+/* ---- spinner ---- */
+.spinner {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  vertical-align: -0.15em;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 2s;
+  }
+}
+
+/* ---- loading panel ---- */
+.loading-panel {
+  display: flex;
+  justify-content: center;
+  padding: 48px 16px;
+  font-size: 18px;
+}

@@ -1,0 +1,122 @@
+/* Design tokens ported by hand from Bort (Tailwind @theme) via Kaeru's app.css.
+   Bort/Kaeru are reference-only and never imported. */
+
+/* ---- self-hosted fonts (copied from Bort/public/fonts) ---- */
+@font-face {
+  font-family: "National Park";
+  src: url("/fonts/NationalPark-Regular.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Reglisse Fill";
+  src: url("/fonts/Reglisse_Fill.otf") format("opentype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ---- Bort theme tokens ---- */
+:root,
+html[data-theme="latenightbath"] {
+  --base-text-color: #46425e;
+  --box-color-standard: #f69197;
+  --base-background-color: #ffeecc;
+  --base-bd-background-color: #ffc4b8;
+}
+html[data-theme="ayy4"] {
+  --base-text-color: #00303b;
+  --box-color-standard: #ffce96;
+  --base-background-color: #f1f2da;
+  --base-bd-background-color: #ff7777;
+}
+html[data-theme="curiosities"] {
+  --base-text-color: #46425e;
+  --box-color-standard: #ffb0a3;
+  --base-background-color: #ffeecc;
+  --base-bd-background-color: #46425e;
+}
+html[data-theme="sunnyswamp"] {
+  --base-text-color: #46425e;
+  --box-color-standard: #d1ad82;
+  --base-background-color: #dbd1b4;
+  --base-bd-background-color: #98a681;
+}
+html[data-theme="standard_og"] {
+  --base-text-color: #5e2bff;
+  --box-color-standard: #b1ede8;
+  --base-background-color: #fffcf9;
+  --base-bd-background-color: #ff6978;
+}
+html[data-theme="werwolvdark"] {
+  --base-text-color: #f3f4f4;
+  --box-color-standard: #686299;
+  --base-background-color: #1e2127;
+  --base-bd-background-color: #242424;
+}
+html[data-theme="trans"] {
+  --base-text-color: #55cdfc;
+  --box-color-standard: #b1ede8;
+  --base-background-color: #fffcf9;
+  --base-bd-background-color: #f7a8b8;
+}
+html[data-theme="nostalgia"] {
+  --base-text-color: #b8b5b9;
+  --box-color-standard: #53a788;
+  --base-background-color: #131620;
+  --base-bd-background-color: #181c28;
+}
+
+:root {
+  --font-bodyf: "National Park", "Helvetica", sans-serif;
+  --font-headerf: "Reglisse Fill", "Arial Black", sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+
+  --accent-color: color-mix(
+    in srgb,
+    var(--box-color-standard) 75%,
+    color-mix(in srgb, var(--base-background-color) 50%, var(--base-text-color))
+  );
+  --accent-contrast-color: var(--base-background-color);
+  --error-color: color-mix(in srgb, var(--base-text-color) 75%, var(--base-background-color));
+  --focus-color: var(--box-color-standard);
+
+  /* Job states are semantic and theme-independent so pass/fail stay readable. */
+  --state-passed: #2f9e6f;
+  --state-passed-contrast: #ffffff;
+  --state-errored: #c0392b;
+  --state-errored-contrast: #ffffff;
+  --state-running: #d98200;
+  --state-running-contrast: #1b1b1b;
+  --state-queued: #3f6fd1;
+  --state-queued-contrast: #ffffff;
+  --state-stopped: #6b7280;
+  --state-stopped-contrast: #ffffff;
+
+  --radius: 4px;
+  --border: color-mix(in srgb, var(--box-color-standard) 55%, transparent);
+  --panel-max: 1280px;
+}
+
+/* Re-skin a box/badge from a single variable based on its data-state. */
+[data-state="passed"] {
+  --state-color: var(--state-passed);
+  --state-contrast: var(--state-passed-contrast);
+}
+[data-state="errored"] {
+  --state-color: var(--state-errored);
+  --state-contrast: var(--state-errored-contrast);
+}
+[data-state="running"] {
+  --state-color: var(--state-running);
+  --state-contrast: var(--state-running-contrast);
+}
+[data-state="queued"] {
+  --state-color: var(--state-queued);
+  --state-contrast: var(--state-queued-contrast);
+}
+[data-state="stopped"] {
+  --state-color: var(--state-stopped);
+  --state-contrast: var(--state-stopped-contrast);
+}

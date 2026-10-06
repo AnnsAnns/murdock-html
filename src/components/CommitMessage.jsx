@@ -1,0 +1,50 @@
+import { GITHUB_REPO } from '../api/config';
+import { Icon } from './Icon';
+
+function linkify(text, keyPrefix) {
+  const nodes = [];
+  const regex = /#(\d+)/g;
+  let last = 0;
+  let match;
+
+  while ((match = regex.exec(text)) !== null) {
+    if (match.index > last) nodes.push(text.slice(last, match.index));
+    nodes.push(
+      <a
+        key={`${keyPrefix}-${match.index}`}
+        href={`https://github.com/${GITHUB_REPO}/issues/${match[1]}`}
+        target="_blank"
+        rel="noreferrer noopener"
+      >
+        #{match[1]}
+      </a>,
+    );
+    last = regex.lastIndex;
+  }
+
+  if (last < text.length) nodes.push(text.slice(last));
+  return nodes;
+}
+
+/** Commit message with GitHub issue references turned into links. */
+export function CommitMessage({ message }) {
+  const [first, ...rest] = message.split('\n');
+
+  return (
+    <>
+      <span>{linkify(first, 'first')}</span>
+      {rest.length > 0 && (
+        <details className="commit-extra-details">
+          <summary title="Show full commit message">
+            <Icon name="expand" />
+          </summary>
+          <div className="commit-extra">
+            {rest.map((line, index) => (
+              <div key={index}>{linkify(line, `line-${index}`)}</div>
+            ))}
+          </div>
+        </details>
+      )}
+    </>
+  );
+}
