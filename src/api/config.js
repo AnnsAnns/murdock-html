@@ -16,6 +16,9 @@ export const GITHUB_GATEKEEPER_URL = trimSlash(env.VITE_GITHUB_GATEKEEPER_URL) |
 export const GITHUB_REDIRECT_URI =
   env.VITE_GITHUB_REDIRECT_URI ||
   (typeof window !== 'undefined' ? `${window.location.origin}/` : '');
+// `public_repo` is what makes `permissions.push` true for public repositories
+// (i.e. shows the maintainer controls). `read:user` is for the profile.
+export const GITHUB_SCOPE = env.VITE_GITHUB_SCOPE || 'read:user public_repo';
 
 export const PRIVACY_URL = env.VITE_PRIVACY_URL || 'https://www.riot-os.org/privacy-policy.html';
 

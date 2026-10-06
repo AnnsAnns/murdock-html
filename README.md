@@ -54,24 +54,30 @@ All settings are Vite env vars (prefix `VITE_`), read from `.env`:
 | `VITE_GITHUB_CLIENT_ID` | GitHub OAuth app client id (empty hides login) | — |
 | `VITE_GITHUB_GATEKEEPER_URL` | OAuth gatekeeper base URL | `{api}/github` |
 | `VITE_GITHUB_REDIRECT_URI` | OAuth redirect URI | `{origin}/` |
+| `VITE_GITHUB_SCOPE` | OAuth scopes requested | `read:user public_repo` |
 | `VITE_PRIVACY_URL` | Privacy policy link | riot-os.org |
 | `VITE_ITEMS_DISPLAYED_STEP` | Jobs fetched per page | `25` |
 
 ### GitHub login
 
-Maintainer actions (cancel / abort / restart) require a GitHub OAuth token,
-which the API expects in the `authorization` header. The login uses the standard
-OAuth code flow with a **gatekeeper** that exchanges the code for a token:
+Maintainer actions (cancel / abort / restart) require a GitHub OAuth token, which
+the API expects in the `authorization` header. GitHub does not allow the OAuth
+token exchange from the browser (its token endpoint sends no CORS headers), so a
+small **gatekeeper** does it server-side and returns the token:
 
 ```
 GET {VITE_GITHUB_GATEKEEPER_URL}/authenticate/{code}  ->  { "token": "..." }
 ```
 
-The gatekeeper URL is configurable; deploy one (for example
-[prose/gatekeeper](https://github.com/prose/gatekeeper)) and register
-`VITE_GITHUB_REDIRECT_URI` as the OAuth app callback. The GitHub client id and
-secret live with the gatekeeper, never in this app. Set `VITE_GITHUB_CLIENT_ID`
-to enable the login button.
+A ready-to-deploy Cloudflare Worker implementation lives in
+[`gatekeeper/`](gatekeeper/) — one stateless function, free tier, holding only
+the OAuth client secret. See [`gatekeeper/README.md`](gatekeeper/README.md) for
+the setup steps. Then set `VITE_GITHUB_CLIENT_ID` and
+`VITE_GITHUB_GATEKEEPER_URL` and the login button appears.
+
+`VITE_GITHUB_SCOPE` must include `public_repo` (or `repo` for private repos);
+without it GitHub reports `permissions.push: false` and the maintainer controls
+stay hidden. Browsing the dashboard needs no login at all.
 
 ## Project layout
 
@@ -84,6 +90,7 @@ src/
   pages/      routed pages (job list, job detail, application results)
   styles/     tokens.css, base.css, components.css (nested CSS)
   utils/      formatting and job helpers
+gatekeeper/   Cloudflare Worker that exchanges the OAuth code for a token
 ```
 
 ## License

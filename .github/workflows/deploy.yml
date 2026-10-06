@@ -54,14 +54,18 @@ jobs:
           echo "BASE_PATH=$base" >> "$GITHUB_ENV"
 
       - run: npm run build
-        # Optional repo variables override the committed .env defaults; empty
-        # values fall back to ci.riot-os.org in src/api/config.js.
+        # Build-time config comes from repository secrets (falling back to
+        # repository variables). Unset values fall back to the committed .env
+        # defaults in src/api/config.js.
         env:
-          VITE_MURDOCK_HTTP_BASE_URL: ${{ vars.VITE_MURDOCK_HTTP_BASE_URL }}
-          VITE_MURDOCK_WS_URL: ${{ vars.VITE_MURDOCK_WS_URL }}
-          VITE_GITHUB_REPO: ${{ vars.VITE_GITHUB_REPO }}
-          VITE_GITHUB_CLIENT_ID: ${{ vars.VITE_GITHUB_CLIENT_ID }}
-          VITE_GITHUB_GATEKEEPER_URL: ${{ vars.VITE_GITHUB_GATEKEEPER_URL }}
+          VITE_MURDOCK_HTTP_BASE_URL: ${{ secrets.VITE_MURDOCK_HTTP_BASE_URL || vars.VITE_MURDOCK_HTTP_BASE_URL }}
+          VITE_MURDOCK_WS_URL: ${{ secrets.VITE_MURDOCK_WS_URL || vars.VITE_MURDOCK_WS_URL }}
+          VITE_GITHUB_REPO: ${{ secrets.VITE_GITHUB_REPO || vars.VITE_GITHUB_REPO }}
+          VITE_GITHUB_CLIENT_ID: ${{ secrets.VITE_GITHUB_CLIENT_ID || vars.VITE_GITHUB_CLIENT_ID }}
+          VITE_GITHUB_GATEKEEPER_URL: ${{ secrets.VITE_GITHUB_GATEKEEPER_URL || vars.VITE_GITHUB_GATEKEEPER_URL }}
+          VITE_GITHUB_REDIRECT_URI: ${{ secrets.VITE_GITHUB_REDIRECT_URI || vars.VITE_GITHUB_REDIRECT_URI }}
+          VITE_GITHUB_SCOPE: ${{ secrets.VITE_GITHUB_SCOPE || vars.VITE_GITHUB_SCOPE }}
+          VITE_PRIVACY_URL: ${{ secrets.VITE_PRIVACY_URL || vars.VITE_PRIVACY_URL }}
 
       # GitHub Pages has no rewrite rules: serve the SPA shell for unknown
       # paths via 404.html, and skip Jekyll so the build output is served as-is.

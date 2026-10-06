@@ -1,13 +1,13 @@
 // GitHub OAuth + REST helpers. The OAuth code is exchanged by a gatekeeper
 // (https://github.com/prose/gatekeeper): GET {gatekeeper}/authenticate/{code}.
 
-import { GITHUB_CLIENT_ID, GITHUB_GATEKEEPER_URL, GITHUB_REDIRECT_URI } from '../api/config';
+import { GITHUB_CLIENT_ID, GITHUB_GATEKEEPER_URL, GITHUB_REDIRECT_URI, GITHUB_SCOPE } from '../api/config';
 
 export function buildAuthorizeUrl(state) {
   const url = new URL('https://github.com/login/oauth/authorize');
   url.searchParams.set('client_id', GITHUB_CLIENT_ID);
   url.searchParams.set('redirect_uri', GITHUB_REDIRECT_URI);
-  url.searchParams.set('scope', 'read:user');
+  url.searchParams.set('scope', GITHUB_SCOPE);
   url.searchParams.set('state', state);
   return url.toString();
 }
