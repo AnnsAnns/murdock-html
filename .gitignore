@@ -16,3 +16,4 @@ coverage
 # design references (nested repos, reference only)
 Bort
 Kaeru
+.env
