@@ -1,0 +1,87 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+# Allow the workflow to publish to Pages via OIDC.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one Pages deployment at a time; don't cancel a running one.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run lint
+
+      - run: npm run test
+
+      # GitHub Pages project sites live under /<repo>/, while user/org sites
+      # and custom domains live at the root. `public/CNAME` marks a custom
+      # domain; a BASE_PATH repository variable overrides the detection.
+      - name: Resolve base path
+        env:
+          BASE_PATH_OVERRIDE: ${{ vars.BASE_PATH }}
+        run: |
+          if [ -n "$BASE_PATH_OVERRIDE" ]; then
+            base="$BASE_PATH_OVERRIDE"
+          elif [ -f public/CNAME ] || [ -f CNAME ]; then
+            base="/"
+          elif [ "${GITHUB_REPOSITORY#*/}" = "${GITHUB_REPOSITORY_OWNER}.github.io" ]; then
+            base="/"
+          else
+            base="/${GITHUB_REPOSITORY#*/}/"
+          fi
+          echo "Using base path: $base"
+          echo "BASE_PATH=$base" >> "$GITHUB_ENV"
+
+      - run: npm run build
+        # Optional repo variables override the committed .env defaults; empty
+        # values fall back to ci.riot-os.org in src/api/config.js.
+        env:
+          VITE_MURDOCK_HTTP_BASE_URL: ${{ vars.VITE_MURDOCK_HTTP_BASE_URL }}
+          VITE_MURDOCK_WS_URL: ${{ vars.VITE_MURDOCK_WS_URL }}
+          VITE_GITHUB_REPO: ${{ vars.VITE_GITHUB_REPO }}
+          VITE_GITHUB_CLIENT_ID: ${{ vars.VITE_GITHUB_CLIENT_ID }}
+          VITE_GITHUB_GATEKEEPER_URL: ${{ vars.VITE_GITHUB_GATEKEEPER_URL }}
+
+      # GitHub Pages has no rewrite rules: serve the SPA shell for unknown
+      # paths via 404.html, and skip Jekyll so the build output is served as-is.
+      - name: Prepare Pages artifact
+        run: |
+          cp dist/index.html dist/404.html
+          touch dist/.nojekyll
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
