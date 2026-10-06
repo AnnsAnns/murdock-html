@@ -3,13 +3,12 @@ import { GITHUB_REPO } from '../api/config';
 import {
   buildProgress,
   jobEnd,
+  jobRefLink,
   jobStartDate,
   jobTitle,
-  jobTitleUrl,
   jobTooltip,
-  prStateColor,
 } from '../utils/job';
-import { formatDayMonthTime, humanizeSeconds, preciseDuration, relativeTime } from '../utils/format';
+import { formatDayMonthTime, formatEta, preciseDuration, relativeTime } from '../utils/format';
 import { FINISHED_STATES } from '../utils/state';
 import { Icon } from './Icon';
 import { Menu } from './Menu';
@@ -29,7 +28,7 @@ function DurationCell({ job }) {
           <span className="row" style={{ gap: 4 }}>
             {progress.failed > 0 && <Icon name="warning" className="state-fg flicker" />}
             <span>
-              {job.status?.eta != null ? humanizeSeconds(job.status.eta) : 'running'} (
+              {job.status?.eta != null ? formatEta(job.status.eta) : 'running'} (
               {progress.percent}%)
             </span>
           </span>
@@ -68,8 +67,12 @@ function StateCell({ job, canManage, onAction }) {
     (job.status?.failed_builds?.length ?? 0) +
     (job.status?.failed_tests?.length ?? 0);
 
-  const badge = canManage ? (
-    <Menu label="Job actions" trigger={<StateBadge state={job.state} />}>
+  const badge = <StateBadge state={job.state} count={failed} />;
+
+  if (!canManage) return badge;
+
+  return (
+    <Menu label="Job actions" trigger={badge}>
       {job.state === 'queued' && (
         <button type="button" className="menu-item" onClick={() => onAction('cancel')}>
           <Icon name="cross" />
@@ -89,19 +92,6 @@ function StateCell({ job, canManage, onAction }) {
         </button>
       )}
     </Menu>
-  ) : (
-    <StateBadge state={job.state} />
-  );
-
-  return (
-    <div className="state-stack">
-      {failed > 0 && (
-        <span className="state-pill failure-pill" data-state="errored" title={`${failed} failures reported`}>
-          {failed} failed
-        </span>
-      )}
-      {badge}
-    </div>
   );
 }
 
@@ -114,9 +104,8 @@ export function JobRow({ job, canManage, onAction, queuedStartAt }) {
   const queuedStart =
     job.state === 'queued' && queuedStartAt != null ? new Date(queuedStartAt) : null;
 
-  const titleUrl = jobTitleUrl(job, GITHUB_REPO);
-  const githubState = prStateColor(job.prinfo);
-  const title = job.prinfo ? `PR #${job.prinfo.number}: ${jobTitle(job)}` : jobTitle(job);
+  const refLink = jobRefLink(job, GITHUB_REPO);
+  const title = jobTitle(job);
 
   return (
     <li className="job-row" data-state={job.state}>
@@ -127,16 +116,18 @@ export function JobRow({ job, canManage, onAction, queuedStartAt }) {
       </div>
 
       <div className="job-title">
-        <a
-          className="github-mark"
-          href={titleUrl}
-          target="_blank"
-          rel="noreferrer noopener"
-          title={titleUrl}
-          data-state={githubState ?? undefined}
-        >
-          <Icon name="github" className={githubState ? 'state-fg' : ''} />
-        </a>
+        {refLink && (
+          <a
+            className="ref-link"
+            href={refLink.url}
+            target="_blank"
+            rel="noreferrer noopener"
+            title={refLink.title}
+          >
+            <Icon name={refLink.icon} size={13} />
+            <span>{refLink.label}</span>
+          </a>
+        )}
         <Link className="job-title-text" to={`/details/${job.uid}`} title={jobTooltip(job)}>
           {title}
         </Link>

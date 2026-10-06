@@ -258,6 +258,37 @@
   color: var(--state-color, inherit);
 }
 
+/* ---- inline links (commit hashes, refs) ---- */
+.link {
+  color: var(--link-color);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+
+  &:hover {
+    text-decoration-thickness: 2px;
+  }
+}
+
+/* A labelled link that clearly redirects off-site (PR, merge queue, branch). */
+.ref-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 auto;
+  padding: 1px 7px;
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--box-color-standard) 22%, transparent);
+  color: var(--link-color);
+  font-size: 12px;
+  white-space: nowrap;
+
+  &:hover {
+    text-decoration: none;
+    background: color-mix(in srgb, var(--box-color-standard) 36%, transparent);
+  }
+}
+
 /* ============================================================
    Forms
    ============================================================ */
@@ -389,7 +420,7 @@
 .job-list-head,
 .job-row {
   display: grid;
-  grid-template-columns: 84px minmax(0, 1fr) 185px 185px 150px 132px;
+  grid-template-columns: 84px minmax(0, 1fr) 115px 115px 150px 132px;
   gap: 12px;
   align-items: center;
   padding: 9px 12px;
@@ -1082,20 +1113,6 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-}
-
-.state-stack {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
-}
-
-.failure-pill {
-  min-width: 104px;
-  justify-content: center;
-  font-size: 11px;
-  padding: 2px 7px;
 }
 
 .tab-badge {

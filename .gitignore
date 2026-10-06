@@ -9,11 +9,11 @@ coverage
 .DS_Store
 *.log
 
-# local env overrides (the committed .env holds public, non-secret defaults)
+# local env (never committed; CI supplies values via repository secrets)
+.env
 .env.local
 .env.*.local
 
 # design references (nested repos, reference only)
 Bort
 Kaeru
-.env

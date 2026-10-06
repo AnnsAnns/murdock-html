@@ -12,8 +12,8 @@ export function JobHeader({ job, canManage, onAction, busy = false }) {
     <div className="box-title">
       <span className="title-label">
         {titleUrl ? (
-          <a href={titleUrl} target="_blank" rel="noreferrer noopener">
-            {title}
+          <a href={titleUrl} target="_blank" rel="noreferrer noopener" title={titleUrl}>
+            {title} <Icon name="external" size={13} />
           </a>
         ) : (
           title

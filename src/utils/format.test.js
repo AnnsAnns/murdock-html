@@ -1,5 +1,25 @@
 import { describe, expect, it } from 'vitest';
-import { formatDayMonthTime, preciseDuration } from './format';
+import { formatDayMonthTime, formatEta, preciseDuration } from './format';
+
+describe('formatEta', () => {
+  it('shows minutes for sub-2h ETAs instead of a rounded hour', () => {
+    expect(formatEta(62 * 60)).toBe('in 62 min');
+    expect(formatEta(90 * 60)).toBe('in 90 min');
+  });
+
+  it('shows hours and minutes for longer ETAs', () => {
+    expect(formatEta(2 * 3600 + 5 * 60)).toBe('in 2h 5m');
+  });
+
+  it('shows days and hours for multi-day ETAs', () => {
+    expect(formatEta(2 * 86400 + 3 * 3600)).toBe('in 2d 3h');
+  });
+
+  it('shows seconds for very short ETAs', () => {
+    expect(formatEta(45)).toBe('in 45s');
+    expect(formatEta(0)).toBe('in 0s');
+  });
+});
 
 describe('formatDayMonthTime', () => {
   it('formats as Day.Month, HH:mm in 24-hour time', () => {

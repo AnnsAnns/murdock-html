@@ -51,6 +51,7 @@
   --base-bd-background-color: #cde7dd;
   --border: color-mix(in srgb, var(--riot-green) 52%, transparent);
   --focus-color: var(--riot-green);
+  --link-color: #256b55;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -61,6 +62,7 @@
     --base-background-color: #1c2924;
     --base-bd-background-color: #0f1815;
     --border: color-mix(in srgb, var(--riot-green) 50%, transparent);
+    --link-color: #7ad4b4;
   }
 }
 

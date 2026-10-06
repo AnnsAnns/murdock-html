@@ -1,6 +1,6 @@
 import { GITHUB_REPO } from '../api/config';
-import { formatDayMonthTime, humanizeSeconds, preciseDuration, relativeTime } from '../utils/format';
-import { jobEnd, jobStartDate } from '../utils/job';
+import { formatDayMonthTime, formatEta, preciseDuration, relativeTime } from '../utils/format';
+import { jobEnd, jobRefLink, jobStartDate } from '../utils/job';
 import { CommitMessage } from './CommitMessage';
 import { Icon } from './Icon';
 
@@ -8,9 +8,10 @@ export function JobInfo({ job }) {
   const start = jobStartDate(job);
   const end = jobEnd(job);
   const status = job.status;
+  const refLink = jobRefLink(job, GITHUB_REPO);
 
   let duration = null;
-  if (job.state === 'running' && status?.eta != null) duration = humanizeSeconds(status.eta);
+  if (job.state === 'running' && status?.eta != null) duration = formatEta(status.eta);
   else if (job.state !== 'running' && job.runtime !== undefined) duration = preciseDuration(job.runtime);
 
   return (
@@ -19,6 +20,7 @@ export function JobInfo({ job }) {
         <span className="job-info-item">
           <Icon name="tag" />
           <a
+            className="link"
             href={`https://github.com/${GITHUB_REPO}/commit/${job.commit.sha}`}
             target="_blank"
             rel="noreferrer noopener"
@@ -27,6 +29,20 @@ export function JobInfo({ job }) {
             {job.commit.sha.slice(0, 7)}
           </a>
         </span>
+
+        {refLink && (
+          <a
+            className="ref-link"
+            href={refLink.url}
+            target="_blank"
+            rel="noreferrer noopener"
+            title={refLink.title}
+          >
+            <Icon name={refLink.icon} size={13} />
+            <span>{refLink.label}</span>
+          </a>
+        )}
+
         <span className="job-info-item">
           <Icon name="person" />
           {job.commit.author}

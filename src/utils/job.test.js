@@ -3,6 +3,7 @@ import {
   buildProgress,
   isMergeQueue,
   jobEnd,
+  jobRefLink,
   jobStartDate,
   jobTitleUrl,
   refRepr,
@@ -94,5 +95,49 @@ describe('jobEnd', () => {
     expect(jobEnd({ state: 'running', status: {} })).toBeNull();
     expect(jobEnd({ state: 'queued', creation_time: 1, runtime: 0 })).toBeNull();
     expect(jobEnd({ state: 'passed', start_time: 0, runtime: 0 })).toBeNull();
+  });
+});
+
+describe('jobRefLink', () => {
+  it('links a PR job to its pull request', () => {
+    const link = jobRefLink(
+      { prinfo: { url: 'https://github.com/x/y/pull/1', number: 1, title: 'Fix it' } },
+      'RIOT-OS/RIOT',
+    );
+    expect(link).toEqual({
+      url: 'https://github.com/x/y/pull/1',
+      label: 'PR #1',
+      title: 'Fix it',
+      icon: 'gitPullRequest',
+    });
+  });
+
+  it('falls back to env.CI_PULL_NR', () => {
+    const link = jobRefLink({ env: { CI_PULL_NR: '42' } }, 'RIOT-OS/RIOT');
+    expect(link.url).toBe('https://github.com/RIOT-OS/RIOT/pull/42');
+    expect(link.label).toBe('PR #42');
+    expect(link.icon).toBe('gitPullRequest');
+  });
+
+  it('links merge-queue jobs to the merge queue', () => {
+    const link = jobRefLink({ ref: 'refs/heads/gh-readonly-queue/master/pr-1' }, 'RIOT-OS/RIOT');
+    expect(link.url).toBe('https://github.com/RIOT-OS/RIOT/queue/master');
+    expect(link.label).toBe('Merge queue');
+    expect(link.icon).toBe('gitMerge');
+  });
+
+  it('links branch and tag refs', () => {
+    expect(jobRefLink({ ref: 'refs/heads/master' }, 'R/R')).toMatchObject({
+      url: 'https://github.com/R/R/tree/master',
+      icon: 'gitBranch',
+    });
+    expect(jobRefLink({ ref: 'refs/tags/v1' }, 'R/R')).toMatchObject({ label: 'v1', icon: 'tag' });
+  });
+
+  it('falls back to the commit', () => {
+    const link = jobRefLink({ commit: { sha: 'abc123' } }, 'R/R');
+    expect(link.url).toBe('https://github.com/R/R/commit/abc123');
+    expect(link.label).toBe('commit');
+    expect(link.icon).toBe('gitCommit');
   });
 });

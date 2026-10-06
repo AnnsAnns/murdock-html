@@ -23,9 +23,22 @@ export function relativeTime(date) {
   return relative.format(0, 'second');
 }
 
-/** "in 5 minutes" for a duration given in seconds (positive = future). */
-export function humanizeSeconds(seconds) {
-  return relativeTime(new Date(Date.now() + seconds * 1000));
+/**
+ * Exact "time from now" for an ETA given in seconds, e.g. "in 62 min",
+ * "in 1h 5m", "in 2d 3h". More precise than a rounded "in about 1 hour".
+ */
+export function formatEta(seconds) {
+  const total = Math.max(0, Math.round(seconds));
+  if (total < 60) return `in ${total}s`;
+  if (total < 7200) return `in ${Math.round(total / 60)} min`;
+  if (total < 86400) {
+    const hours = Math.floor(total / 3600);
+    const minutes = Math.floor((total % 3600) / 60);
+    return `in ${hours}h ${minutes}m`;
+  }
+  const days = Math.floor(total / 86400);
+  const hours = Math.floor((total % 86400) / 3600);
+  return `in ${days}d ${hours}h`;
 }
 
 /**

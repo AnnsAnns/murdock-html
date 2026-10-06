@@ -71,6 +71,73 @@ export function jobTooltip(job) {
   return text;
 }
 
+/**
+ * The external reference a job belongs to, with a human label for the link:
+ * its pull request, the merge queue, or the branch/tag/commit it was built
+ * from. Data comes from the job payload itself (no extra requests).
+ */
+export function jobRefLink(job, repo) {
+  if (job.prinfo?.url) {
+    return {
+      url: job.prinfo.url,
+      label: `PR #${job.prinfo.number}`,
+      title: job.prinfo.title ?? `Pull request #${job.prinfo.number}`,
+      icon: 'gitPullRequest',
+    };
+  }
+
+  const pullNr = job.env?.CI_PULL_NR;
+  if (pullNr) {
+    return {
+      url: `https://github.com/${repo}/pull/${pullNr}`,
+      label: `PR #${pullNr}`,
+      title: `Pull request #${pullNr}`,
+      icon: 'gitPullRequest',
+    };
+  }
+
+  if (isMergeQueue(job.ref)) {
+    const branch = job.ref.split('/').slice(3, 4)[0];
+    return {
+      url: `https://github.com/${repo}/queue/${branch}`,
+      label: 'Merge queue',
+      title: `Merge queue for ${branch}`,
+      icon: 'gitMerge',
+    };
+  }
+
+  if (job.ref?.startsWith('refs/heads/')) {
+    const branch = job.ref.slice('refs/heads/'.length);
+    return {
+      url: `https://github.com/${repo}/tree/${branch}`,
+      label: branch,
+      title: `Branch ${branch}`,
+      icon: 'gitBranch',
+    };
+  }
+
+  if (job.ref?.startsWith('refs/tags/')) {
+    const tag = job.ref.slice('refs/tags/'.length);
+    return {
+      url: `https://github.com/${repo}/tree/${tag}`,
+      label: tag,
+      title: `Tag ${tag}`,
+      icon: 'tag',
+    };
+  }
+
+  if (job.commit?.sha) {
+    return {
+      url: `https://github.com/${repo}/commit/${job.commit.sha}`,
+      label: 'commit',
+      title: `Commit ${job.commit.sha}`,
+      icon: 'gitCommit',
+    };
+  }
+
+  return null;
+}
+
 /** When a job started. A zero/absent `start_time` means it never started. */
 export function jobStartDate(job) {
   const seconds = [job.start_time, job.creation_time].find((value) => value > 0);

@@ -12,4 +12,10 @@ describe('StateBadge', () => {
     render(<StateBadge state="errored" />);
     expect(screen.getByTitle('Failed')).toBeInTheDocument();
   });
+
+  it('folds a failure count into the same label', () => {
+    render(<StateBadge state="errored" count={21} />);
+    expect(screen.getByText('Failed · 21')).toBeInTheDocument();
+    expect(screen.getByTitle('Failed — 21 failures reported')).toBeInTheDocument();
+  });
 });

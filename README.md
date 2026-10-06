@@ -54,7 +54,7 @@ All settings are Vite env vars (prefix `VITE_`), read from `.env`:
 | `VITE_GITHUB_CLIENT_ID` | GitHub OAuth app client id (empty hides login) | — |
 | `VITE_GITHUB_GATEKEEPER_URL` | OAuth gatekeeper base URL | `{api}/github` |
 | `VITE_GITHUB_REDIRECT_URI` | OAuth redirect URI | `{origin}/` |
-| `VITE_GITHUB_SCOPE` | OAuth scopes requested | `read:user public_repo` |
+| `VITE_GITHUB_SCOPE` | OAuth scopes requested | `read:user` |
 | `VITE_PRIVACY_URL` | Privacy policy link | riot-os.org |
 | `VITE_ITEMS_DISPLAYED_STEP` | Jobs fetched per page | `25` |
 
@@ -75,9 +75,9 @@ the OAuth client secret. See [`gatekeeper/README.md`](gatekeeper/README.md) for
 the setup steps. Then set `VITE_GITHUB_CLIENT_ID` and
 `VITE_GITHUB_GATEKEEPER_URL` and the login button appears.
 
-`VITE_GITHUB_SCOPE` must include `public_repo` (or `repo` for private repos);
-without it GitHub reports `permissions.push: false` and the maintainer controls
-stay hidden. Browsing the dashboard needs no login at all.
+The default `read:user` scope is enough: it covers the profile request and the
+`permissions.push` check used to show the maintainer controls. Browsing the
+dashboard needs no login at all.
 
 ## Project layout
 
