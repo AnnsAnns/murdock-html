@@ -25,6 +25,7 @@ export function JobListPage() {
   const [jobs, setJobs] = useState([]);
   const [loaded, setLoaded] = useState(false);
   const [refreshToken, setRefreshToken] = useState(0);
+  const [running, setRunning] = useState(null);
   const [draft, setDraft] = useState({
     sha: params.sha,
     author: params.author,
@@ -65,12 +66,33 @@ export function JobListPage() {
     return () => controller.abort();
   }, [apiQuery, refreshToken]);
 
+  // Track the currently running job's ETA so queued jobs can show an earliest
+  // possible start ("at least" the running job's estimated finish). Fetched
+  // independently of the dashboard filters so it stays available when
+  // filtering by queued only. `finishAt` is an absolute timestamp.
+  useEffect(() => {
+    const controller = new AbortController();
+    getJobs('limit=1&states=running', controller.signal)
+      .then((runningJobs) => {
+        const job = runningJobs[0];
+        const eta = job?.status?.eta;
+        setRunning(job && eta != null ? { uid: job.uid, finishAt: Date.now() + eta * 1000 } : null);
+      })
+      .catch(() => setRunning(null));
+    return () => controller.abort();
+  }, [refreshToken]);
+
   useMurdockSocket((message) => {
     if (message.cmd === 'reload') {
       setRefreshToken((token) => token + 1);
     } else if (message.cmd === 'status') {
       setJobs((list) =>
         list.map((job) => (job.uid === message.uid ? { ...job, status: message.status } : job)),
+      );
+      setRunning((current) =>
+        current && current.uid === message.uid && message.status?.eta != null
+          ? { uid: current.uid, finishAt: Date.now() + message.status.eta * 1000 }
+          : current,
       );
     } else if (message.cmd === 'output') {
       setJobs((list) =>
@@ -134,7 +156,12 @@ export function JobListPage() {
       {!loaded ? (
         <Spinner />
       ) : jobs.length ? (
-        <JobList jobs={jobs} canManage={canManage} onAction={onAction} />
+        <JobList
+          jobs={jobs}
+          canManage={canManage}
+          onAction={onAction}
+          queuedStartAt={running?.finishAt ?? null}
+        />
       ) : (
         <div className="empty-state">No job matching</div>
       )}

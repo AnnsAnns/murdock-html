@@ -1,5 +1,16 @@
 import { describe, expect, it } from 'vitest';
-import { preciseDuration } from './format';
+import { formatDayMonthTime, preciseDuration } from './format';
+
+describe('formatDayMonthTime', () => {
+  it('formats as Day.Month, HH:mm in 24-hour time', () => {
+    expect(formatDayMonthTime(new Date(2026, 9, 6, 15, 26))).toBe('6.10, 15:26');
+    expect(formatDayMonthTime(new Date(2026, 0, 1, 9, 5))).toBe('1.1, 09:05');
+  });
+
+  it('pads the time to two digits', () => {
+    expect(formatDayMonthTime(new Date(2026, 11, 24, 0, 0))).toBe('24.12, 00:00');
+  });
+});
 
 describe('preciseDuration', () => {
   it('formats sub-minute durations with padded seconds', () => {

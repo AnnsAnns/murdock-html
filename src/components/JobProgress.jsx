@@ -27,7 +27,7 @@ export function JobProgress({ job, status }) {
         <div style={{ flex: '1 1 320px', minWidth: 200 }}>
           <div className="progress is-tall">
             <div
-              className="progress-bar is-striped"
+              className={`progress-bar ${job.state === 'running' ? 'is-striped' : ''}`}
               data-state={progress.failed ? 'errored' : 'running'}
               style={{ width: `${progress.percent}%` }}
             >

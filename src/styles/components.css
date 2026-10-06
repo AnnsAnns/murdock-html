@@ -222,7 +222,9 @@
 .state-badge {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
+  min-width: 104px;
   padding: 4px 9px;
   border-radius: var(--radius);
   background: var(--state-color, var(--box-color-standard));
@@ -387,7 +389,7 @@
 .job-list-head,
 .job-row {
   display: grid;
-  grid-template-columns: 84px minmax(0, 1fr) 200px 170px 132px;
+  grid-template-columns: 84px minmax(0, 1fr) 185px 185px 150px 132px;
   gap: 12px;
   align-items: center;
   padding: 9px 12px;
@@ -437,7 +439,8 @@
   }
 }
 
-.job-date {
+.job-start,
+.job-end {
   font-size: 13px;
   opacity: 0.85;
 }
@@ -464,7 +467,8 @@
     grid-template-columns: minmax(0, 1fr) auto;
     grid-template-areas:
       "title state"
-      "date state";
+      "start state"
+      "end state";
     row-gap: 3px;
     align-items: start;
   }
@@ -478,8 +482,22 @@
     grid-area: title;
   }
 
-  .job-date {
-    grid-area: date;
+  .job-start {
+    grid-area: start;
+
+    &::before {
+      content: "Start: ";
+      opacity: 0.7;
+    }
+  }
+
+  .job-end {
+    grid-area: end;
+
+    &::before {
+      content: "End: ";
+      opacity: 0.7;
+    }
   }
 
   .job-state {
@@ -1015,6 +1033,83 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+/* ---- job summary chips (first-look overview) ---- */
+.job-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+
+  .stat {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 5px;
+    padding: 3px 9px;
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--box-color-standard) 22%, transparent);
+    font-size: 13px;
+
+    &[data-state] {
+      background: var(--state-color);
+      color: var(--state-contrast);
+    }
+
+    .stat-value {
+      font-family: var(--font-headerf);
+      font-size: 15px;
+    }
+
+    .stat-label {
+      opacity: 0.85;
+    }
+  }
+
+  .job-note {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+  }
+}
+
+.failure-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.state-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.failure-pill {
+  min-width: 104px;
+  justify-content: center;
+  font-size: 11px;
+  padding: 2px 7px;
+}
+
+.tab-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--state-errored);
+  color: var(--state-errored-contrast);
+  font-size: 11px;
+  font-weight: 600;
 }
 
 /* Hide secondary table columns on narrow screens. */

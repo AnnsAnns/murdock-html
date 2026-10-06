@@ -36,7 +36,15 @@ function ResultsList({ kind, uid, results, failures, liveFailures, job, stats })
   const [failuresFilter, setFailuresFilter] = useState('');
 
   const list = (results ?? []).filter((result) => result.application.includes(filter));
-  const failed = (failures ?? []).filter(
+
+  // tests.json embeds a `failures` array per application; fall back to it when
+  // the dedicated *_failures.json file is empty or missing.
+  const effectiveFailures =
+    kind === 'tests' && !(failures?.length)
+      ? (results ?? []).flatMap((result) => result.failures ?? [])
+      : (failures ?? []);
+
+  const failed = effectiveFailures.filter(
     (result) => result.application.includes(failuresFilter) || result.target.includes(failuresFilter),
   );
   const live = (liveFailures ?? []).filter((result) => result.application);
@@ -48,7 +56,7 @@ function ResultsList({ kind, uid, results, failures, liveFailures, job, stats })
 
   return (
     <>
-      {(failures?.length ?? 0) > 0 && (
+      {(effectiveFailures?.length ?? 0) > 0 && (
         <div className="card is-danger">
           <div className="card-header is-danger">
             <span>

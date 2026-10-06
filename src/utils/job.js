@@ -70,3 +70,30 @@ export function jobTooltip(job) {
   if (job.prinfo?.labels?.length) text += `\n\nLabels: "${job.prinfo.labels.join('", "')}"`;
   return text;
 }
+
+/** When a job started. A zero/absent `start_time` means it never started. */
+export function jobStartDate(job) {
+  const seconds = [job.start_time, job.creation_time].find((value) => value > 0);
+  return seconds != null ? new Date(seconds * 1000) : null;
+}
+
+/**
+ * When a job ended. For a running job this is an estimate derived from
+ * `status.eta` (seconds remaining), so it is marked as estimated. Queued jobs
+ * have not ended.
+ */
+export function jobEnd(job, now = Date.now()) {
+  if (job.state === 'running') {
+    const eta = job.status?.eta;
+    if (eta == null) return null;
+    return { date: new Date((now / 1000 + eta) * 1000), estimated: true };
+  }
+
+  if (job.state === 'queued') return null;
+
+  if (job.start_time > 0 && job.runtime != null) {
+    return { date: new Date((job.start_time + job.runtime) * 1000), estimated: false };
+  }
+
+  return null;
+}

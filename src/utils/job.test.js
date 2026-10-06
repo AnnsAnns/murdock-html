@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { buildProgress, isMergeQueue, jobTitleUrl, refRepr } from './job';
+import {
+  buildProgress,
+  isMergeQueue,
+  jobEnd,
+  jobStartDate,
+  jobTitleUrl,
+  refRepr,
+} from './job';
 
 const job = (overrides = {}) => ({
   uid: 'abc',
@@ -53,5 +60,39 @@ describe('buildProgress', () => {
   it('returns null when counters are incomplete', () => {
     expect(buildProgress({ passed: 3 })).toBeNull();
     expect(buildProgress(null)).toBeNull();
+  });
+});
+
+describe('jobStartDate', () => {
+  it('prefers start_time', () => {
+    expect(jobStartDate({ start_time: 100, creation_time: 50 }).getTime()).toBe(100000);
+  });
+
+  it('falls back to creation_time', () => {
+    expect(jobStartDate({ creation_time: 50 }).getTime()).toBe(50000);
+  });
+
+  it('ignores a zero start_time (queued job)', () => {
+    expect(jobStartDate({ start_time: 0, creation_time: 50 }).getTime()).toBe(50000);
+    expect(jobStartDate({ start_time: 0, creation_time: 0 })).toBeNull();
+  });
+});
+
+describe('jobEnd', () => {
+  it('is start + runtime for finished jobs', () => {
+    const end = jobEnd({ state: 'passed', start_time: 1000, runtime: 60 });
+    expect(end).toEqual({ date: new Date(1060000), estimated: false });
+  });
+
+  it('estimates a running job from status.eta', () => {
+    const now = 5_000_000; // ms
+    const end = jobEnd({ state: 'running', start_time: 1000, status: { eta: 30 } }, now);
+    expect(end).toEqual({ date: new Date((5000 + 30) * 1000), estimated: true });
+  });
+
+  it('returns null when there is nothing to derive an end from', () => {
+    expect(jobEnd({ state: 'running', status: {} })).toBeNull();
+    expect(jobEnd({ state: 'queued', creation_time: 1, runtime: 0 })).toBeNull();
+    expect(jobEnd({ state: 'passed', start_time: 0, runtime: 0 })).toBeNull();
   });
 });

@@ -47,17 +47,14 @@ export function preciseDuration(value) {
   return parts.join(' ');
 }
 
-/** Full localised date + time, e.g. "9/30/2026, 2:03:14 PM". */
-export function formatDateTime(date) {
-  return date.toLocaleString();
-}
-
-/** Long localised date, e.g. "Wed, Sep 30, 2026". */
-export function formatDateLong(date) {
-  return date.toLocaleDateString(undefined, {
-    weekday: 'short',
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
+/**
+ * Compact "Day.Month, HH:mm" (24-hour) date, e.g. "6.10, 15:26".
+ * Used for the start/end columns and the job header.
+ */
+export function formatDayMonthTime(date) {
+  const day = date.getDate();
+  const month = date.getMonth() + 1;
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  return `${day}.${month}, ${hours}:${minutes}`;
 }

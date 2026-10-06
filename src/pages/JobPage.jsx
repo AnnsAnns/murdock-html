@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { deleteJob, getJob, getResultFile, restartJob } from '../api/murdock';
 import { useAuth } from '../auth/AuthContext';
 import { Icon } from '../components/Icon';
+import { FailedJobs } from '../components/FailedJobs';
 import { JobArtifacts } from '../components/JobArtifacts';
 import { JobDetails } from '../components/JobDetails';
 import { JobHeader } from '../components/JobHeader';
@@ -11,6 +12,7 @@ import { JobOutput } from '../components/JobOutput';
 import { JobProgress } from '../components/JobProgress';
 import { JobBuilds, JobTests } from '../components/JobResults';
 import { JobStats } from '../components/JobStats';
+import { JobSummary } from '../components/JobSummary';
 import { Spinner } from '../components/Spinner';
 import { useToast } from '../components/Toast';
 import { useDocumentTitle, useFavicon } from '../hooks/useDocumentTitle';
@@ -19,7 +21,7 @@ import { jobContext, refRepr } from '../utils/job';
 
 const RESULT_TABS = ['builds', 'tests', 'output', 'artifacts', 'details', 'stats'];
 
-function Tab({ path, id, active, label, icon, tone }) {
+function Tab({ path, id, active, label, icon, tone, badge = 0 }) {
   return (
     <Link
       className={`tab ${active ? 'is-active' : ''}`}
@@ -30,6 +32,7 @@ function Tab({ path, id, active, label, icon, tone }) {
         <Icon name={icon} />
       </span>
       {label}
+      {badge > 0 && <span className="tab-badge">{badge}</span>}
     </Link>
   );
 }
@@ -57,6 +60,7 @@ export function JobPage() {
   const [tests, setTests] = useState(null);
   const [testFailures, setTestFailures] = useState(null);
   const [stats, setStats] = useState(null);
+  const [resultsPublished, setResultsPublished] = useState(false);
   const [refreshToken, setRefreshToken] = useState(0);
   const [busy, setBusy] = useState(false);
 
@@ -68,6 +72,7 @@ export function JobPage() {
     setTests(null);
     setTestFailures(null);
     setStats(null);
+    setResultsPublished(false);
 
     getJob(path, controller.signal)
       .then((data) => {
@@ -86,22 +91,26 @@ export function JobPage() {
   }, [path, refreshToken]);
 
   // Finished jobs expose their per-application results as static JSON files.
+  // Cancelled/stopped jobs usually 404 here, in which case we fall back to the
+  // live status counters and any failures captured before the stop.
   useEffect(() => {
-    if (!job || !['passed', 'errored'].includes(job.state)) return undefined;
+    if (!job || !['passed', 'errored', 'stopped'].includes(job.state)) return undefined;
     let cancelled = false;
 
-    const load = (file, setter) =>
+    const load = (file, setter, markPublished = false) =>
       getResultFile(job.uid, file)
         .then((data) => {
-          if (!cancelled) setter(data);
+          if (cancelled) return;
+          setter(data);
+          if (markPublished) setResultsPublished(true);
         })
         .catch(() => {
           if (!cancelled) setter([]);
         });
 
-    load('builds.json', setBuilds);
+    load('builds.json', setBuilds, true);
+    load('tests.json', setTests, true);
     load('build_failures.json', setBuildFailures);
-    load('tests.json', setTests);
     load('test_failures.json', setTestFailures);
     load('stats.json', setStats);
 
@@ -159,9 +168,20 @@ export function JobPage() {
   if (!job) return <div className="empty-state">Job not found.</div>;
 
   const status = job.status;
-  const hasFailedBuilds =
-    (buildFailures?.length ?? 0) > 0 || (status?.failed_builds?.length ?? 0) > 0;
-  const hasFailedTests = (testFailures?.length ?? 0) > 0 || (status?.failed_tests?.length ?? 0) > 0;
+  // tests.json embeds a `failures` array per application; prefer the dedicated
+  // file but fall back to the embedded list so nothing is hidden.
+  const effectiveTestFailures =
+    (testFailures?.length ?? 0) > 0
+      ? testFailures
+      : (tests ?? []).flatMap((test) => test.failures ?? []);
+  const buildFailCount = resultsPublished
+    ? (buildFailures?.length ?? 0)
+    : (status?.failed_builds?.length ?? 0);
+  const testFailCount = resultsPublished
+    ? effectiveTestFailures.length
+    : (status?.failed_tests?.length ?? 0);
+  const hasFailedBuilds = buildFailCount > 0;
+  const hasFailedTests = testFailCount > 0;
   const buildsAvailable = (builds?.length ?? 0) > 0 || (status?.failed_builds?.length ?? 0) > 0;
   const testsAvailable = (tests?.length ?? 0) > 0 || (status?.failed_tests?.length ?? 0) > 0;
   const detailsAvailable = 'fasttracked' in job && 'trigger' in job && Boolean(job.env);
@@ -187,8 +207,20 @@ export function JobPage() {
         <div className="box-body">
           <JobInfo job={job} />
           <JobProgress job={job} status={status} />
+          <JobSummary
+            job={job}
+            status={status}
+            stats={stats}
+            resultsPublished={resultsPublished}
+            builds={builds}
+            tests={tests}
+            buildFailures={buildFailures}
+            testFailures={effectiveTestFailures}
+          />
         </div>
       </article>
+
+      <FailedJobs jobs={status?.failed_jobs} />
 
       <div className="m-2">
         <nav className="tabs" aria-label="Job sections">
@@ -200,6 +232,7 @@ export function JobPage() {
               label="Builds"
               icon={hasFailedBuilds ? 'cross' : 'check'}
               tone={hasFailedBuilds ? 'errored' : 'passed'}
+              badge={buildFailCount}
             />
           )}
           {testsAvailable && (
@@ -210,6 +243,7 @@ export function JobPage() {
               label="Tests"
               icon={hasFailedTests ? 'cross' : 'check'}
               tone={hasFailedTests ? 'errored' : 'passed'}
+              badge={testFailCount}
             />
           )}
           {outputAvailable && (

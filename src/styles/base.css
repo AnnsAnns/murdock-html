@@ -172,9 +172,6 @@ textarea {
     .topbar-nav {
       display: flex;
     }
-    .menu-toggle {
-      display: none;
-    }
   }
 }
 

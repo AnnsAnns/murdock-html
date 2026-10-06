@@ -1,15 +1,17 @@
 import { GITHUB_REPO } from '../api/config';
-import { formatDateTime, humanizeSeconds, preciseDuration, relativeTime } from '../utils/format';
+import { formatDayMonthTime, humanizeSeconds, preciseDuration, relativeTime } from '../utils/format';
+import { jobEnd, jobStartDate } from '../utils/job';
 import { CommitMessage } from './CommitMessage';
 import { Icon } from './Icon';
 
 export function JobInfo({ job }) {
-  const created = new Date(job.creation_time * 1000);
+  const start = jobStartDate(job);
+  const end = jobEnd(job);
   const status = job.status;
 
-  let runtime = null;
-  if (job.state === 'running' && status?.eta != null) runtime = humanizeSeconds(status.eta);
-  else if (job.state !== 'running' && job.runtime !== undefined) runtime = preciseDuration(job.runtime);
+  let duration = null;
+  if (job.state === 'running' && status?.eta != null) duration = humanizeSeconds(status.eta);
+  else if (job.state !== 'running' && job.runtime !== undefined) duration = preciseDuration(job.runtime);
 
   return (
     <div>
@@ -29,14 +31,26 @@ export function JobInfo({ job }) {
           <Icon name="person" />
           {job.commit.author}
         </span>
-        <span className="job-info-item" title={relativeTime(created)}>
-          <Icon name="calendar" />
-          {formatDateTime(created)}
-        </span>
-        {runtime && (
+        {start && (
+          <span className="job-info-item" title={relativeTime(start)}>
+            <Icon name="calendar" />
+            {job.state === 'queued' ? 'Queued' : 'Started'} {formatDayMonthTime(start)}
+          </span>
+        )}
+        {end && (
+          <span
+            className="job-info-item"
+            title={end.estimated ? 'Estimated end time' : relativeTime(end.date)}
+          >
+            <Icon name="calendar" />
+            {end.estimated ? 'Ends ~' : 'Ended '}
+            {formatDayMonthTime(end.date)}
+          </span>
+        )}
+        {duration && (
           <span className="job-info-item">
             <Icon name="clock" />
-            {runtime}
+            {duration}
           </span>
         )}
       </div>

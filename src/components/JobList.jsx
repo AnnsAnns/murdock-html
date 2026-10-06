@@ -1,18 +1,25 @@
 import { JobRow } from './JobRow';
 
-export function JobList({ jobs, canManage, onAction }) {
+export function JobList({ jobs, canManage, onAction, queuedStartAt }) {
   return (
     <div className="panel">
       <div className="job-list-head" aria-hidden="true">
         <span>Job</span>
         <span>Title</span>
-        <span>Date</span>
+        <span>Start Date</span>
+        <span>End Date</span>
         <span>Duration</span>
         <span className="text-end">State</span>
       </div>
       <ul className="job-list">
         {jobs.map((job) => (
-          <JobRow key={job.uid} job={job} canManage={canManage} onAction={onAction} />
+          <JobRow
+            key={job.uid}
+            job={job}
+            canManage={canManage}
+            onAction={onAction}
+            queuedStartAt={queuedStartAt}
+          />
         ))}
       </ul>
     </div>

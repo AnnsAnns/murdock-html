@@ -1,7 +1,15 @@
 import { Link } from 'react-router-dom';
 import { GITHUB_REPO } from '../api/config';
-import { buildProgress, jobTitle, jobTitleUrl, jobTooltip, prStateColor } from '../utils/job';
-import { formatDateTime, humanizeSeconds, preciseDuration, relativeTime } from '../utils/format';
+import {
+  buildProgress,
+  jobEnd,
+  jobStartDate,
+  jobTitle,
+  jobTitleUrl,
+  jobTooltip,
+  prStateColor,
+} from '../utils/job';
+import { formatDayMonthTime, humanizeSeconds, preciseDuration, relativeTime } from '../utils/format';
 import { FINISHED_STATES } from '../utils/state';
 import { Icon } from './Icon';
 import { Menu } from './Menu';
@@ -55,9 +63,12 @@ function DurationCell({ job }) {
 }
 
 function StateCell({ job, canManage, onAction }) {
-  if (!canManage) return <StateBadge state={job.state} />;
+  const failed =
+    (job.status?.failed_jobs?.length ?? 0) +
+    (job.status?.failed_builds?.length ?? 0) +
+    (job.status?.failed_tests?.length ?? 0);
 
-  return (
+  const badge = canManage ? (
     <Menu label="Job actions" trigger={<StateBadge state={job.state} />}>
       {job.state === 'queued' && (
         <button type="button" className="menu-item" onClick={() => onAction('cancel')}>
@@ -78,11 +89,31 @@ function StateCell({ job, canManage, onAction }) {
         </button>
       )}
     </Menu>
+  ) : (
+    <StateBadge state={job.state} />
+  );
+
+  return (
+    <div className="state-stack">
+      {failed > 0 && (
+        <span className="state-pill failure-pill" data-state="errored" title={`${failed} failures reported`}>
+          {failed} failed
+        </span>
+      )}
+      {badge}
+    </div>
   );
 }
 
-export function JobRow({ job, canManage, onAction }) {
-  const created = new Date(job.creation_time * 1000);
+export function JobRow({ job, canManage, onAction, queuedStartAt }) {
+  const start = jobStartDate(job);
+  const end = jobEnd(job);
+
+  // A queued job cannot start before the running job finishes, so its start is
+  // "at least" the running job's estimated finish (passed in as a timestamp).
+  const queuedStart =
+    job.state === 'queued' && queuedStartAt != null ? new Date(queuedStartAt) : null;
+
   const titleUrl = jobTitleUrl(job, GITHUB_REPO);
   const githubState = prStateColor(job.prinfo);
   const title = job.prinfo ? `PR #${job.prinfo.number}: ${jobTitle(job)}` : jobTitle(job);
@@ -111,10 +142,31 @@ export function JobRow({ job, canManage, onAction }) {
         </Link>
       </div>
 
-      <div className="job-date">
-        <Link to={`/details/${job.uid}`} title={relativeTime(created)}>
-          {formatDateTime(created)}
-        </Link>
+      <div className="job-start">
+        {queuedStart ? (
+          <Link to={`/details/${job.uid}`} title="Earliest possible start, after the running job">
+            ≥ {formatDayMonthTime(queuedStart)}
+          </Link>
+        ) : start ? (
+          <Link to={`/details/${job.uid}`} title={relativeTime(start)}>
+            {formatDayMonthTime(start)}
+          </Link>
+        ) : (
+          <span className="muted">-</span>
+        )}
+      </div>
+
+      <div className="job-end">
+        {end ? (
+          <Link
+            to={`/details/${job.uid}`}
+            title={end.estimated ? 'Estimated end time' : relativeTime(end.date)}
+          >
+            {end.estimated ? `~${formatDayMonthTime(end.date)}` : formatDayMonthTime(end.date)}
+          </Link>
+        ) : (
+          <span className="muted">-</span>
+        )}
       </div>
 
       <DurationCell job={job} />

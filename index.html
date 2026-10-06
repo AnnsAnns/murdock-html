@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="latenightbath">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -7,17 +7,7 @@
     <link rel="shortcut icon" id="favicon" type="image/png" href="/favicon.png" />
     <link rel="alternate icon" type="image/x-icon" href="/favicon.ico" />
     <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#000000" />
     <title>Murdock</title>
-    <script>
-      // Apply the persisted theme before first paint to avoid a flash.
-      try {
-        const t = localStorage.getItem('murdock-theme');
-        if (t) document.documentElement.setAttribute('data-theme', t);
-      } catch {
-        /* storage unavailable */
-      }
-    </script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
