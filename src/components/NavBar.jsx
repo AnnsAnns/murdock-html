@@ -1,5 +1,6 @@
 import { Link, NavLink } from 'react-router-dom';
 import { API_BASE, GITHUB_REPO_URL, PRIVACY_URL } from '../api/config';
+import frog from '../imgs/frog.webp';
 import { Icon } from './Icon';
 import { GithubLoginButton } from '../auth/GithubLoginButton';
 
@@ -7,8 +8,8 @@ export function NavBar() {
   return (
     <header className="topbar">
       <Link to="/" className="brand">
-        <Icon name="gear" className="brand-mark" size={20} />
-        <span>Murfrog 🐸🔎</span>
+        <img className="brand-frog" src={frog} alt="" width={28} height={28} />
+        <span>Murfrog</span>
       </Link>
 
       <nav className="topbar-nav" aria-label="Main">

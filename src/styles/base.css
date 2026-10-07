@@ -133,8 +133,12 @@ textarea {
     line-height: 1;
     white-space: nowrap;
 
-    .brand-mark {
-      color: var(--box-color-standard);
+    /* Animated frog wordmark (looping WebP). */
+    .brand-frog {
+      display: block;
+      width: 48px;
+      height: 48px;
+      flex: 0 0 auto;
     }
   }
 
