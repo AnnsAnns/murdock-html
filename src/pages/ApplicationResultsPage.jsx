@@ -16,7 +16,7 @@ export function ApplicationResultsPage({ type }) {
   const [failuresFilter, setFailuresFilter] = useState('');
 
   const typeLabel = type.charAt(0).toUpperCase() + type.slice(1);
-  useDocumentTitle(`Murdock - ${appPath} ${type}`);
+  useDocumentTitle(`Murfrog - ${appPath} ${type}`);
 
   useEffect(() => {
     const controller = new AbortController();

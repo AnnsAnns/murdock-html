@@ -45,7 +45,7 @@ export function JobListPage() {
   const { canManage, user } = useAuth();
   const { notify } = useToast();
 
-  useDocumentTitle(`Murdock - ${GITHUB_REPO}`);
+  useDocumentTitle(`Murfrog - ${GITHUB_REPO}`);
 
   // Keep the local text draft in sync with the committed query params.
   useEffect(() => {

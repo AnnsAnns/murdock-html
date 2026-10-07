@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { JobDetail } from '../components/JobDetail';
-import { useDocumentTitle, useFavicon } from '../hooks/useDocumentTitle';
+import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { refRepr } from '../utils/job';
 
 export function JobPage() {
@@ -16,8 +16,8 @@ export function JobPage() {
     return routeParams.uid;
   }, [routeParams]);
 
-  // Mirror the loaded job into the document title/favicon; the detail view
-  // itself owns fetching and rendering.
+  // Mirror the loaded job into the document title; the detail view itself owns
+  // fetching and rendering.
   const [job, setJob] = useState(null);
   const onJobLoaded = useCallback((next) => setJob(next), []);
 
@@ -30,9 +30,6 @@ export function JobPage() {
     job?.state === 'passed' ? ' - Passed' : job?.state === 'errored' ? ' - Failed' : '';
   useDocumentTitle(
     job ? `Murdock - ${contextLabel} - ${job.commit.sha.slice(0, 7)}${stateSuffix}` : 'Murdock',
-  );
-  useFavicon(
-    job?.state === 'passed' ? '/passed.png' : job?.state === 'errored' ? '/failed.png' : '/favicon.ico',
   );
 
   const tabHref = useCallback((id) => `/details/${path}/${id}`, [path]);
