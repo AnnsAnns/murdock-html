@@ -1,0 +1,23 @@
+/* Murdock styles, split into small modules and imported once from main.jsx.
+   Import order matters: tokens → base → components. */
+
+@import './tokens.css';
+
+@import './base/reset.css';
+@import './base/layout.css';
+@import './base/motion.css';
+
+@import './components/box.css';
+@import './components/dashboard.css';
+@import './components/controls.css';
+@import './components/filters.css';
+@import './components/active-time.css';
+@import './components/jobs.css';
+@import './components/menu.css';
+@import './components/tabs.css';
+@import './components/progress.css';
+@import './components/job-detail.css';
+@import './components/results.css';
+@import './components/output.css';
+@import './components/chrome.css';
+@import './components/misc.css';

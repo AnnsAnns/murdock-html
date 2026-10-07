@@ -1,0 +1,37 @@
+/* ============================================================
+   Tabs
+   ============================================================ */
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 14px;
+  border-bottom: 3px solid var(--box-color-standard);
+
+  .tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 13px;
+    border: none;
+    border-radius: var(--radius) var(--radius) 0 0;
+    background: transparent;
+    color: inherit;
+    font-size: 14px;
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: none;
+      background: color-mix(in srgb, var(--box-color-standard) 22%, transparent);
+    }
+
+    &.is-active {
+      background: var(--box-color-standard);
+      color: var(--on-accent);
+    }
+  }
+}
+
+.tab-panel {
+  padding-top: 4px;
+}

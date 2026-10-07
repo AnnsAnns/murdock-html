@@ -88,7 +88,8 @@ src/
   components/ presentational UI (job list/rows, tabs, results, toasts, ...)
   hooks/      WebSocket, document title
   pages/      routed pages (job list, job detail, application results)
-  styles/     tokens.css, base.css, components.css (nested CSS)
+  styles/     index.css barrel + tokens.css; base/ and components/ modules
+              (native CSS nesting, one file per concern)
   utils/      formatting and job helpers
 gatekeeper/   Cloudflare Worker that exchanges the OAuth code for a token
 ```

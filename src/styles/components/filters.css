@@ -1,0 +1,106 @@
+/* ============================================================
+   Filter panel
+   ============================================================ */
+.filter-panel {
+  .box-body {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .filter-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .filter-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    opacity: 0.6;
+    white-space: nowrap;
+  }
+
+  .input {
+    min-width: 150px;
+  }
+
+  .filter-search {
+    margin-left: auto;
+  }
+}
+
+.toolbar-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.segmented {
+  display: inline-flex;
+  border: 2px solid var(--box-color-standard);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 3px 3px 0 0 color-mix(in srgb, var(--box-color-standard) 45%, transparent);
+
+  button {
+    border: none;
+    background: transparent;
+    color: inherit;
+    padding: 6px 12px;
+    font-size: 14px;
+    cursor: pointer;
+
+    &:hover {
+      background: color-mix(in srgb, var(--box-color-standard) 25%, transparent);
+    }
+
+    &.is-on {
+      background: var(--box-color-standard);
+      color: var(--on-accent);
+    }
+  }
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  min-height: 32px;
+  padding: 4px 8px;
+  --state-color: var(--box-color-standard);
+  border: 2px solid var(--state-color, var(--border));
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--state-color, inherit);
+  cursor: pointer;
+  box-shadow: 2px 2px 0 0 color-mix(in srgb, var(--state-color, var(--box-color-standard)) 45%, transparent);
+
+  &:hover {
+    background: color-mix(in srgb, var(--state-color, var(--box-color-standard)) 22%, transparent);
+  }
+
+  &:active {
+    translate: 1px 1px;
+    box-shadow: 1px 1px 0 0 color-mix(in srgb, var(--state-color, var(--box-color-standard)) 45%, transparent);
+  }
+
+  &.is-on {
+    background: var(--state-color);
+    color: var(--state-contrast, var(--on-accent));
+
+    &:hover {
+      filter: brightness(1.08);
+    }
+  }
+}

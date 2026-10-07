@@ -1,0 +1,52 @@
+/* ============================================================
+   Menu (maintainer actions)
+   ============================================================ */
+.menu {
+  position: relative;
+  display: inline-block;
+}
+
+.menu-trigger {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  border-radius: var(--radius);
+}
+
+.menu-items {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  z-index: 60;
+  min-width: 168px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px;
+  background: var(--base-background-color);
+  border-radius: var(--radius);
+  box-shadow:
+    0 0 0 3px var(--box-color-standard),
+    4px 4px 0 0 color-mix(in srgb, var(--box-color-standard) 50%, transparent);
+
+  .menu-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 8px 10px;
+    border: none;
+    border-radius: 3px;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+
+    &:hover {
+      background: color-mix(in srgb, var(--box-color-standard) 35%, transparent);
+    }
+  }
+}

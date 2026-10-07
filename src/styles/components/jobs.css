@@ -1,0 +1,217 @@
+/* ============================================================
+   Job list (table-like grid that collapses into cards)
+   ============================================================ */
+.job-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.job-list-head,
+.job-row {
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr) 115px 115px 150px 156px;
+  gap: 12px;
+  align-items: center;
+  padding: 9px 12px;
+}
+
+.job-list-head {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.65;
+  border-bottom: 2px solid var(--border);
+}
+
+.job-row {
+  position: relative;
+  /* A tiny wash in the job's own state colour (faint red for failures, etc.). */
+  --row-tint: var(--state-color, var(--box-color-standard));
+  background: color-mix(in srgb, var(--row-tint) 4%, transparent);
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background: color-mix(in srgb, var(--row-tint) 12%, transparent);
+  }
+
+  &.is-expanded {
+    background: color-mix(in srgb, var(--row-tint) 16%, transparent);
+  }
+}
+
+/* Ref badge (PR / merge queue / branch): same box size as the state badge. */
+.job-ref {
+  display: flex;
+  min-width: 0;
+
+  .ref-link {
+    width: 120px;
+    max-width: 100%;
+    justify-content: center;
+    padding: 4px 9px;
+    gap: 6px;
+  }
+
+  .ref-link-label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+/* Expand/collapse control; the whole row is also clickable. */
+.job-expand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius);
+  background: transparent;
+  color: inherit;
+  opacity: 0.6;
+  cursor: pointer;
+
+  svg {
+    transition: transform 0.15s ease;
+  }
+
+  &:hover {
+    opacity: 1;
+    background: color-mix(in srgb, var(--row-tint, var(--base-text-color)) 24%, transparent);
+  }
+
+  svg.is-open {
+    transform: rotate(180deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .job-expand svg {
+    transition: none;
+  }
+}
+
+/* Inline detail view that unfolds under a row (fetched only when opened). */
+.job-embed {
+  list-style: none;
+  padding: 10px 10px 12px;
+  background: color-mix(in srgb, var(--base-text-color) 4%, transparent);
+  box-shadow: inset 0 3px 0 0 color-mix(in srgb, var(--box-color-standard) 55%, transparent);
+}
+
+.job-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+
+  .job-title-text {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .github-mark {
+    flex: 0 0 auto;
+  }
+}
+
+.job-start,
+.job-end {
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+.job-duration {
+  font-size: 13px;
+
+  .progress {
+    margin-top: 4px;
+  }
+}
+
+.job-state {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+
+  /* The maintainer actions sit behind a compact "..." menu next to the badge. */
+  .menu-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    min-height: 28px;
+    padding: 2px;
+    opacity: 0.75;
+
+    &:hover {
+      opacity: 1;
+      background: color-mix(in srgb, var(--box-color-standard) 25%, transparent);
+    }
+  }
+}
+
+@media (max-width: 860px) {
+  .job-list-head {
+    display: none;
+  }
+
+  .job-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "ref state"
+      "title state"
+      "start state"
+      "end state";
+    row-gap: 3px;
+    align-items: start;
+  }
+
+  .job-duration {
+    display: none;
+  }
+
+  .job-ref {
+    grid-area: ref;
+  }
+
+  .job-title {
+    grid-area: title;
+  }
+
+  .job-start {
+    grid-area: start;
+
+    &::before {
+      content: "Start: ";
+      opacity: 0.7;
+    }
+  }
+
+  .job-end {
+    grid-area: end;
+
+    &::before {
+      content: "End: ";
+      opacity: 0.7;
+    }
+  }
+
+  .job-state {
+    grid-area: state;
+    align-self: center;
+  }
+}
