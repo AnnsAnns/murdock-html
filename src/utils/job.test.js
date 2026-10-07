@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   buildProgress,
+  estimateQueuedStarts,
+  estimatedRuntime,
   isMergeQueue,
   jobEnd,
   jobRefLink,
@@ -95,6 +97,72 @@ describe('jobEnd', () => {
     expect(jobEnd({ state: 'running', status: {} })).toBeNull();
     expect(jobEnd({ state: 'queued', creation_time: 1, runtime: 0 })).toBeNull();
     expect(jobEnd({ state: 'passed', start_time: 0, runtime: 0 })).toBeNull();
+  });
+});
+
+describe('estimatedRuntime', () => {
+  it('is short for skip-compile-test jobs', () => {
+    expect(estimatedRuntime({ env: { CI_PULL_LABELS: 'CI: ready for build;CI: skip compile test' } })).toBe(
+      180,
+    );
+  });
+
+  it('is long for full builds', () => {
+    expect(estimatedRuntime({ env: { CI_PULL_LABELS: 'CI: full build' } })).toBe(7200);
+  });
+
+  it('is long for merge-queue jobs', () => {
+    expect(estimatedRuntime({ ref: 'refs/heads/gh-readonly-queue/master/pr-1' })).toBe(7200);
+    expect(
+      estimatedRuntime({ env: { CI_BUILD_REF: 'refs/heads/gh-readonly-queue/master/pr-1' } }),
+    ).toBe(7200);
+  });
+
+  it('defaults to a normal build', () => {
+    expect(estimatedRuntime({ env: { CI_PULL_LABELS: 'CI: ready for build' } })).toBe(900);
+  });
+});
+
+describe('estimateQueuedStarts', () => {
+  const now = 1_000_000_000_000; // ms
+
+  it('starts the first queued job when the running job finishes', () => {
+    const running = { uid: 'r', state: 'running', creation_time: 1, status: { eta: 60 } };
+    const queued = { uid: 'q', state: 'queued', creation_time: 2 };
+    const starts = estimateQueuedStarts([queued, running], now);
+    expect(starts.get('q')).toBe(now + 60 * 1000);
+  });
+
+  it('sums the estimated runtimes of the jobs ahead in the queue', () => {
+    const running = { uid: 'r', state: 'running', creation_time: 1, status: { eta: 30 } };
+    const skip = {
+      uid: 'a',
+      state: 'queued',
+      creation_time: 2,
+      env: { CI_PULL_LABELS: 'CI: skip compile test' },
+    };
+    const full = {
+      uid: 'b',
+      state: 'queued',
+      creation_time: 3,
+      ref: 'refs/heads/gh-readonly-queue/master/pr-1',
+    };
+    const starts = estimateQueuedStarts([full, skip, running], now);
+    expect(starts.get('a')).toBe(now + 30 * 1000);
+    expect(starts.get('b')).toBe(now + (30 + 180) * 1000);
+  });
+
+  it('falls back to the estimated runtime when a running job has no ETA', () => {
+    const startedAt = now / 1000 - 60;
+    const running = { uid: 'r', state: 'running', creation_time: 1, start_time: startedAt };
+    const queued = { uid: 'q', state: 'queued', creation_time: 2 };
+    const starts = estimateQueuedStarts([running, queued], now);
+    expect(starts.get('q')).toBe(now + (900 - 60) * 1000);
+  });
+
+  it('ignores jobs that are neither running nor queued', () => {
+    const starts = estimateQueuedStarts([{ uid: 'p', state: 'passed', creation_time: 1 }], now);
+    expect(starts.size).toBe(0);
   });
 });
 

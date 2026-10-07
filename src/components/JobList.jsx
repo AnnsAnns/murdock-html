@@ -1,6 +1,6 @@
 import { JobRow } from './JobRow';
 
-export function JobList({ jobs, canManage, onAction, queuedStartAt }) {
+export function JobList({ jobs, canManage, onAction, queuedStarts }) {
   return (
     <div className="panel">
       <div className="job-list-head" aria-hidden="true">
@@ -18,7 +18,7 @@ export function JobList({ jobs, canManage, onAction, queuedStartAt }) {
             job={job}
             canManage={canManage}
             onAction={onAction}
-            queuedStartAt={queuedStartAt}
+            queuedStarts={queuedStarts}
           />
         ))}
       </ul>

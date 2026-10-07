@@ -95,14 +95,17 @@ function StateCell({ job, canManage, onAction }) {
   );
 }
 
-export function JobRow({ job, canManage, onAction, queuedStartAt }) {
+export function JobRow({ job, canManage, onAction, queuedStarts }) {
   const start = jobStartDate(job);
   const end = jobEnd(job);
 
-  // A queued job cannot start before the running job finishes, so its start is
-  // "at least" the running job's estimated finish (passed in as a timestamp).
+  // A queued job cannot start before the jobs ahead of it finish. The page
+  // estimates that moment from the queue (running job ETA + queued jobs'
+  // runtimes guessed from their CI flags) and passes it in as a Map.
   const queuedStart =
-    job.state === 'queued' && queuedStartAt != null ? new Date(queuedStartAt) : null;
+    job.state === 'queued' && queuedStarts?.has(job.uid)
+      ? new Date(queuedStarts.get(job.uid))
+      : null;
 
   const refLink = jobRefLink(job, GITHUB_REPO);
   const title = jobTitle(job);
@@ -135,7 +138,10 @@ export function JobRow({ job, canManage, onAction, queuedStartAt }) {
 
       <div className="job-start">
         {queuedStart ? (
-          <Link to={`/details/${job.uid}`} title="Earliest possible start, after the running job">
+          <Link
+            to={`/details/${job.uid}`}
+            title="Estimated start, after the jobs ahead in the queue"
+          >
             ≥ {formatDayMonthTime(queuedStart)}
           </Link>
         ) : start ? (

@@ -15,7 +15,10 @@ import { Spinner } from '../components/Spinner';
 import { useToast } from '../components/Toast';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useMurdockSocket } from '../hooks/useMurdockSocket';
-import { jobContext } from '../utils/job';
+import { estimateQueuedStarts, jobContext } from '../utils/job';
+
+// How many running/queued jobs to look at when estimating queued start times.
+const QUEUE_LOOKAHEAD = 100;
 
 export function JobListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -25,7 +28,7 @@ export function JobListPage() {
   const [jobs, setJobs] = useState([]);
   const [loaded, setLoaded] = useState(false);
   const [refreshToken, setRefreshToken] = useState(0);
-  const [running, setRunning] = useState(null);
+  const [queue, setQueue] = useState([]);
   const [draft, setDraft] = useState({
     sha: params.sha,
     author: params.author,
@@ -66,21 +69,20 @@ export function JobListPage() {
     return () => controller.abort();
   }, [apiQuery, refreshToken]);
 
-  // Track the currently running job's ETA so queued jobs can show an earliest
-  // possible start ("at least" the running job's estimated finish). Fetched
-  // independently of the dashboard filters so it stays available when
-  // filtering by queued only. `finishAt` is an absolute timestamp.
+  // Track the running and queued jobs to estimate when a queued job will start:
+  // each job ahead of it in the queue contributes its estimated runtime (a
+  // running job its live ETA, a queued one its runtime guessed from the CI
+  // flags). Fetched independently of the dashboard filters so it stays
+  // available when filtering by queued only.
   useEffect(() => {
     const controller = new AbortController();
-    getJobs('limit=1&states=running', controller.signal)
-      .then((runningJobs) => {
-        const job = runningJobs[0];
-        const eta = job?.status?.eta;
-        setRunning(job && eta != null ? { uid: job.uid, finishAt: Date.now() + eta * 1000 } : null);
-      })
-      .catch(() => setRunning(null));
+    getJobs(`limit=${QUEUE_LOOKAHEAD}&states=running+queued`, controller.signal)
+      .then(setQueue)
+      .catch(() => setQueue([]));
     return () => controller.abort();
   }, [refreshToken]);
+
+  const queuedStarts = useMemo(() => estimateQueuedStarts(queue), [queue]);
 
   useMurdockSocket((message) => {
     if (message.cmd === 'reload') {
@@ -89,10 +91,8 @@ export function JobListPage() {
       setJobs((list) =>
         list.map((job) => (job.uid === message.uid ? { ...job, status: message.status } : job)),
       );
-      setRunning((current) =>
-        current && current.uid === message.uid && message.status?.eta != null
-          ? { uid: current.uid, finishAt: Date.now() + message.status.eta * 1000 }
-          : current,
+      setQueue((list) =>
+        list.map((job) => (job.uid === message.uid ? { ...job, status: message.status } : job)),
       );
     } else if (message.cmd === 'output') {
       setJobs((list) =>
@@ -160,7 +160,7 @@ export function JobListPage() {
           jobs={jobs}
           canManage={canManage}
           onAction={onAction}
-          queuedStartAt={running?.finishAt ?? null}
+          queuedStarts={queuedStarts}
         />
       ) : (
         <div className="empty-state">No job matching</div>

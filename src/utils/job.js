@@ -164,3 +164,58 @@ export function jobEnd(job, now = Date.now()) {
 
   return null;
 }
+
+// Typical Murdock runtimes in seconds, used to estimate when queued jobs start.
+// The CI flags in `env` tell the job classes apart: a "skip compile test" run
+// is only a few minutes, a regular build ~15 min, and a full build (or a
+// merge-queue run, which builds everything) ~2 h.
+const SKIP_COMPILE_TEST_RUNTIME = 3 * 60;
+const NORMAL_RUNTIME = 15 * 60;
+const FULL_BUILD_RUNTIME = 2 * 60 * 60;
+
+/**
+ * Estimated total runtime (seconds) of a job, inferred from the CI flags
+ * Murdock records in `env` and the job's ref.
+ */
+export function estimatedRuntime(job) {
+  const labels = job.env?.CI_PULL_LABELS ?? '';
+  if (labels.includes('CI: skip compile test')) return SKIP_COMPILE_TEST_RUNTIME;
+  if (labels.includes('CI: full build')) return FULL_BUILD_RUNTIME;
+  const ref = job.ref ?? job.env?.CI_BUILD_REF ?? '';
+  if (isMergeQueue(ref)) return FULL_BUILD_RUNTIME;
+  return NORMAL_RUNTIME;
+}
+
+/** Remaining runtime (seconds): the live `status.eta` while running, else the estimate. */
+function remainingRuntime(job, now) {
+  if (job.state === 'running') {
+    const eta = job.status?.eta;
+    if (eta != null) return Math.max(0, eta);
+    const start = jobStartDate(job);
+    if (start) return Math.max(0, estimatedRuntime(job) - (now - start.getTime()) / 1000);
+  }
+  return estimatedRuntime(job);
+}
+
+/**
+ * Estimated start time (ms since epoch) for every queued job, assuming the
+ * queue is worked through in order. Each job ahead contributes its remaining
+ * runtime: a running job its live `status.eta`, a queued one its estimated
+ * runtime derived from the CI flags. Returns a Map keyed by uid.
+ */
+export function estimateQueuedStarts(jobs, now = Date.now()) {
+  const starts = new Map();
+  const ordered = [...jobs].sort((a, b) => (a.creation_time ?? 0) - (b.creation_time ?? 0));
+
+  let cursor = now;
+  for (const job of ordered) {
+    if (job.state === 'running') {
+      cursor += remainingRuntime(job, now) * 1000;
+    } else if (job.state === 'queued') {
+      starts.set(job.uid, cursor);
+      cursor += remainingRuntime(job, now) * 1000;
+    }
+  }
+
+  return starts;
+}
