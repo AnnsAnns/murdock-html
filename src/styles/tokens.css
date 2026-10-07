@@ -10,8 +10,8 @@
   font-display: swap;
 }
 @font-face {
-  font-family: "Reglisse Fill";
-  src: url("/fonts/Reglisse_Fill.otf") format("opentype");
+  font-family: "LxgwWenKai";
+  src: url("/fonts/LXGWWenKaiTC-Bold.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -29,7 +29,7 @@
   --progress-stripe: rgba(255, 255, 255, 0.25);
 
   --font-bodyf: "National Park", "Helvetica", sans-serif;
-  --font-headerf: "Reglisse Fill", "Arial Black", sans-serif;
+  --font-headerf: "LxgwWenKai", "Arial Black", sans-serif;
   --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
 
   --radius: 4px;
