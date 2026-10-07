@@ -31,6 +31,12 @@
     0 0 0 3px var(--box-color-standard),
     4px 4px 0 0 color-mix(in srgb, var(--box-color-standard) 50%, transparent);
 
+  /* Anchor the dropdown's left edge to the trigger (opens rightwards). */
+  &.menuItemsStart {
+    left: 0;
+    right: auto;
+  }
+
   .menuItem {
     display: flex;
     align-items: center;
@@ -47,6 +53,10 @@
 
     &:hover {
       background: color-mix(in srgb, var(--box-color-standard) 35%, transparent);
+    }
+
+    svg {
+      flex: 0 0 auto;
     }
   }
 }

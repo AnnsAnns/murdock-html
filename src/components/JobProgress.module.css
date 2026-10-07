@@ -84,6 +84,9 @@
   top: 0;
   right: 0;
   bottom: 0;
+  /* Leave room for the current-job "..." menu so the first (failed) counter
+     sits just below it. */
+  padding-top: 30px;
   align-items: flex-end;
   justify-content: space-between;
 }

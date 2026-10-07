@@ -11,6 +11,12 @@ body {
   min-height: 100%;
 }
 
+/* Reserve the scrollbar's space so the centered layout does not jump when the
+   scrollbar appears or disappears. */
+html {
+  scrollbar-gutter: stable;
+}
+
 body {
   background: var(--base-bd-background-color);
   color: var(--base-text-color);

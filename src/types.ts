@@ -33,6 +33,7 @@ export type IconName =
   | 'expand'
   | 'transfer'
   | 'search'
+  | 'filter'
   | 'close'
   | 'menu'
   | 'more'

@@ -6,10 +6,18 @@ interface MenuProps {
   children: ReactNode;
   label?: string;
   triggerClassName?: string;
+  /** Which edge of the trigger the dropdown is anchored to. Default `end`. */
+  align?: 'start' | 'end';
 }
 
 /** Small click-outside dropdown used for maintainer job actions. */
-export function Menu({ trigger, children, label = 'Actions', triggerClassName = '' }: MenuProps) {
+export function Menu({
+  trigger,
+  children,
+  label = 'Actions',
+  triggerClassName = '',
+  align = 'end',
+}: MenuProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -42,7 +50,10 @@ export function Menu({ trigger, children, label = 'Actions', triggerClassName = 
         {trigger}
       </button>
       {open && (
-        <div className={styles.menuItems} onClick={() => setOpen(false)}>
+        <div
+          className={`${styles.menuItems}${align === 'start' ? ` ${styles.menuItemsStart}` : ''}`}
+          onClick={() => setOpen(false)}
+        >
           {children}
         </div>
       )}

@@ -2,67 +2,95 @@
    Filter panel
    ============================================================ */
 .filterPanel {
-  .filterBar {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .filterGroup {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .filterLabel {
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    opacity: 0.6;
-    white-space: nowrap;
-  }
-
-  .filterSearch {
+  /* Active-filter count in the title bar. */
+  .activeBadge {
     margin-left: auto;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--on-accent) 25%, transparent);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    white-space: nowrap;
   }
 }
 
-/* Applied to the panel's .boxBody and to its inputs. */
+/* The panel is a vertical column of labelled sections. */
 .filterBody {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 18px;
 }
 
-.filterInput {
-  min-width: 150px;
-}
-
-.toolbarGroup {
+.filterSection {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 4px;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.segmented {
+.filterLabel {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  opacity: 0.6;
+}
+
+.sectionHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.stateSummary {
   display: inline-flex;
-  border: 2px solid var(--box-color-standard);
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.75;
+}
+
+.selectAll {
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--box-color-standard);
+  font: inherit;
+  font-weight: 700;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+/* ---- type segmented control ---- */
+.segmented {
+  display: flex;
+  border: 2px solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;
-  box-shadow: 3px 3px 0 0 color-mix(in srgb, var(--box-color-standard) 45%, transparent);
+  background: color-mix(in srgb, var(--base-text-color) 5%, transparent);
 
   button {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 8px 2px;
     border: none;
     background: transparent;
     color: inherit;
-    padding: 6px 12px;
-    font-size: 14px;
+    font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     cursor: pointer;
 
     &:hover {
-      background: color-mix(in srgb, var(--box-color-standard) 25%, transparent);
+      background: color-mix(in srgb, var(--base-text-color) 10%, transparent);
     }
 
     &.isOn {
@@ -72,90 +100,111 @@
   }
 }
 
-.toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+/* ---- state rows ---- */
+.stateList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 6px;
-  min-width: 36px;
-  min-height: 32px;
-  padding: 4px 8px;
-  --state-color: var(--box-color-standard);
-  border: 2px solid var(--state-color, var(--border));
+}
+
+.stateRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 2px solid var(--border);
   border-radius: var(--radius);
-  background: transparent;
-  color: var(--state-color, inherit);
+  background: color-mix(in srgb, var(--base-text-color) 4%, transparent);
+  color: inherit;
+  text-align: left;
   cursor: pointer;
-  box-shadow: 2px 2px 0 0 color-mix(in srgb, var(--state-color, var(--box-color-standard)) 45%, transparent);
 
   &:hover {
-    background: color-mix(in srgb, var(--state-color, var(--box-color-standard)) 22%, transparent);
-  }
-
-  &:active {
-    translate: 1px 1px;
-    box-shadow: 1px 1px 0 0 color-mix(in srgb, var(--state-color, var(--box-color-standard)) 45%, transparent);
+    background: color-mix(in srgb, var(--base-text-color) 9%, transparent);
   }
 
   &.isOn {
-    background: var(--state-color);
-    color: var(--state-contrast, var(--on-accent));
+    border-color: var(--box-color-standard);
+    background: color-mix(in srgb, var(--box-color-standard) 18%, transparent);
 
-    &:hover {
-      filter: brightness(1.08);
+    .checkbox {
+      border-color: var(--box-color-standard);
+      background: var(--box-color-standard);
+      color: var(--on-accent);
     }
   }
 }
 
-/* In the wide-screen left gutter the panel is a narrow vertical column: the
-   type and state controls become full-width boxes that stack and grow down
-   the panel, and every input/button fills the available width. */
-@media (min-width: 1800px) {
-  .filterPanel {
-    .filterBar {
-      flex-direction: column;
-      flex-wrap: nowrap;
-      align-items: stretch;
-      gap: 14px;
-    }
+.checkbox {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--border);
+  border-radius: 3px;
+  background: var(--base-background-color);
+  color: var(--on-accent);
+}
 
-    .filterGroup {
-      display: flex;
-      flex-direction: column;
-      flex-wrap: nowrap;
-      align-items: stretch;
-      gap: 6px;
-    }
+.stateIcon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  color: var(--state-color, inherit);
+}
 
-    .filterSearch {
-      margin-left: 0;
-      width: 100%;
-    }
+.stateName {
+  font-size: 14px;
+}
+
+/* ---- commit fields ---- */
+.fieldGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 8px;
+}
+
+.filterInput {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.prStates {
+  display: flex;
+  gap: 6px;
+}
+
+.prToggle {
+  flex: 1 1 0;
+  padding: 8px 10px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  background: transparent;
+  color: inherit;
+  font-size: 13px;
+  cursor: pointer;
+
+  &:hover {
+    background: color-mix(in srgb, var(--base-text-color) 9%, transparent);
   }
 
-  .filterInput {
-    flex: 1 1 auto;
-    min-width: 0;
+  &.isOn {
+    border-color: var(--box-color-standard);
+    background: var(--box-color-standard);
+    color: var(--on-accent);
   }
+}
 
-  .segmented {
-    display: flex;
-    flex-direction: column;
-  }
+/* ---- footer actions ---- */
+.filterActions {
+  display: flex;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 2px solid var(--border);
+}
 
-  .segmented button {
-    width: 100%;
-    text-align: left;
-  }
-
-  .toolbarGroup {
-    flex-direction: column;
-    flex-wrap: nowrap;
-    align-items: stretch;
-  }
-
-  .toggle {
-    width: 100%;
-    justify-content: flex-start;
-  }
+.filterSearch {
+  flex: 1 1 auto;
 }

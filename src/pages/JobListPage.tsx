@@ -10,7 +10,7 @@ import {
 import { useAuth } from '../auth/AuthContext';
 import { ActiveTimeBar } from '../components/ActiveTimeBar';
 import { CurrentJob } from '../components/CurrentJob';
-import { JobActions } from '../components/JobActions';
+import { JobDetail } from '../components/JobDetail';
 import { JobFilters } from '../components/JobFilters';
 import { JobList } from '../components/JobList';
 import { JobSection } from '../components/JobSection';
@@ -22,7 +22,7 @@ import { useMurdockSocket } from '../hooks/useMurdockSocket';
 import { estimateQueuedStarts, jobContext } from '../utils/job';
 import dashboard from '../components/JobListPage.module.css';
 import { withViewTransition } from '../utils/viewTransition';
-import { FINISHED_STATES } from '../utils/state';
+import { FINISHED_STATES, STATES } from '../utils/state';
 import type {
   DraftParams,
   Job,
@@ -131,17 +131,23 @@ export function JobListPage() {
   );
 
   const onType = (type: JobType) => update({ type });
-  const onToggleState = (state: JobState) =>
+  // Inverted filters: a hidden state is one removed from the API's included
+  // `states` list.
+  const onToggleHiddenState = (state: JobState) =>
     update({
       states: params.states.includes(state)
         ? params.states.filter((entry) => entry !== state)
         : [...params.states, state],
     });
-  const onTogglePrState = (key: 'open' | 'closed') =>
+  const onToggleHiddenPrState = (key: 'open' | 'closed') =>
     update({ prstates: { ...params.prstates, [key]: !params.prstates[key] } });
+  // The state filters are inverted: "clear" removes every exclusion, showing
+  // all states again (the API still receives the included states).
+  const onClearStates = () => update({ states: [...STATES] });
   const onDraftChange = (field: keyof DraftParams, value: string) =>
     setDraft((current) => ({ ...current, [field]: value }));
   const onCommit = () => update(draft);
+  const onReset = () => setSearchParams(new URLSearchParams());
   const showMore = () => update({ limit: Number(params.limit) + ITEMS_DISPLAYED_STEP });
   const toggleExpand = useCallback(
     (uid: string) =>
@@ -182,10 +188,12 @@ export function JobListPage() {
           params={params}
           draft={draft}
           onType={onType}
-          onToggleState={onToggleState}
-          onTogglePrState={onTogglePrState}
+          onToggleHiddenState={onToggleHiddenState}
+          onClearStates={onClearStates}
+          onToggleHiddenPrState={onToggleHiddenPrState}
           onDraftChange={onDraftChange}
           onCommit={onCommit}
+          onReset={onReset}
         />
       </aside>
 
@@ -196,22 +204,22 @@ export function JobListPage() {
           <Spinner />
         ) : jobs.length ? (
           <>
-            <JobSection
-              title="Current Job"
-              icon="gear"
-              state={running?.state}
-              action={
-                running && (
-                  <JobActions
+            <JobSection title="Current Job" icon="gear" state={running?.state}>
+              {running ? (
+                <>
+                  <CurrentJob
                     job={running}
                     canManage={canManage}
                     onAction={(action) => onAction(running, action)}
+                    expanded={expandedUid === running.uid}
+                    onToggle={() => toggleExpand(running.uid)}
                   />
-                )
-              }
-            >
-              {running ? (
-                <CurrentJob job={running} />
+                  {expandedUid === running.uid && (
+                    <div className={dashboard.currentJobEmbed} data-state={running.state}>
+                      <JobDetail path={running.uid} />
+                    </div>
+                  )}
+                </>
               ) : (
                 <p className="muted">No job is running right now.</p>
               )}

@@ -25,6 +25,8 @@ export interface JobActionsProps {
   busy?: boolean;
   variant?: 'buttons' | 'menu';
   triggerClassName?: string;
+  /** Which edge the "..." dropdown is anchored to. Default `end`. */
+  menuAlign?: 'start' | 'end';
 }
 
 /**
@@ -45,12 +47,18 @@ export function JobActions({
   busy = false,
   variant = 'buttons',
   triggerClassName,
+  menuAlign = 'end',
 }: JobActionsProps) {
   const action = jobAction(job.state);
 
   if (variant === 'menu') {
     return (
-      <Menu label="Job actions" trigger={<Icon name="more" />} triggerClassName={triggerClassName}>
+      <Menu
+        label="Job actions"
+        trigger={<Icon name="more" />}
+        triggerClassName={triggerClassName}
+        align={menuAlign}
+      >
         <Link className={menu.menuItem} to={`/details/${job.uid}`}>
           <Icon name="external" />
           <span>Open full page</span>

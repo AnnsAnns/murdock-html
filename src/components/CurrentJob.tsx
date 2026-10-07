@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom';
 import { GITHUB_REPO } from '../api/config';
 import dashboard from './JobListPage.module.css';
 import jobDetail from './JobInfo.module.css';
@@ -6,27 +5,55 @@ import controls from '../styles/controls.module.css';
 import { formatDayMonthTime } from '../utils/format';
 import { jobEnd, jobRefLink, jobStartDate, jobTitle } from '../utils/job';
 import { Icon } from './Icon';
+import { JobActions } from './JobActions';
 import { JobProgress } from './JobProgress';
-import type { Job } from '../types';
+import type { Job, JobActionName } from '../types';
 
 export interface CurrentJobProps {
   job: Job;
+  canManage: boolean;
+  onAction: (action: JobActionName) => void;
+  expanded: boolean;
+  onToggle: () => void;
 }
 
 /**
  * The running job, shown prominently in the "Current Job" section: what it is,
- * where it came from, when it started/ends and the live build progress.
+ * where it came from, when it started/ends and the live build progress. Its
+ * "..." menu expands the inline detail, opens the full page or aborts it.
  */
-export function CurrentJob({ job }: CurrentJobProps) {
+export function CurrentJob({ job, canManage, onAction, expanded, onToggle }: CurrentJobProps) {
   const refLink = jobRefLink(job, GITHUB_REPO);
   const start = jobStartDate(job);
   const end = jobEnd(job);
 
   return (
     <div className={dashboard.currentJob}>
-      <Link className={dashboard.currentJobTitle} to={`/details/${job.uid}`}>
-        {jobTitle(job)}
-      </Link>
+      <div className={dashboard.currentJobMenuWrap}>
+        <JobActions
+          job={job}
+          canManage={canManage}
+          onAction={onAction}
+          variant="menu"
+          triggerClassName={dashboard.currentJobMenu}
+        />
+      </div>
+
+      <div className={dashboard.currentJobHead}>
+        <button
+          type="button"
+          className={dashboard.currentJobTitle}
+          aria-expanded={expanded}
+          onClick={onToggle}
+        >
+          <Icon
+            name="chevronDown"
+            size={16}
+            className={expanded ? dashboard.isOpen : ''}
+          />
+          <span>{jobTitle(job)}</span>
+        </button>
+      </div>
 
       <div className={jobDetail.jobInfo}>
         {refLink && (
