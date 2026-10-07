@@ -18,9 +18,15 @@
 }
 
 :root {
-  /* ---- accent: a soft but saturated take on the RIOT green #40a687 ---- */
-  --brand: #57c8a2; /* mint-green accent */
-  --on-accent: #17352c; /* dark text/icon colour on accent surfaces */
+  /* ---- accent green: one colour for box rings and title bars ---- */
+  --brand: #2f8a6d;
+  --on-accent: #ffffff;
+
+  /* White overlays drawn on dark/coloured surfaces (stripes, terminal buttons). */
+  --overlay-faint: rgba(255, 255, 255, 0.15);
+  --overlay-soft: rgba(255, 255, 255, 0.3);
+  --overlay-strong: rgba(255, 255, 255, 0.45);
+  --progress-stripe: rgba(255, 255, 255, 0.25);
 
   --font-bodyf: "National Park", "Helvetica", sans-serif;
   --font-headerf: "Reglisse Fill", "Arial Black", sans-serif;
@@ -54,7 +60,7 @@
   --base-background-color: #ffffff;
   --base-bd-background-color: #f6f4ef;
   --border: color-mix(in srgb, var(--base-text-color) 14%, transparent);
-  --focus-color: #2f8a6d;
+  --focus-color: var(--brand);
   --link-color: #b23a48;
 }
 

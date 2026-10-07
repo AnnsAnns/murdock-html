@@ -8,6 +8,7 @@ import {
   queryStringToQueryParams,
 } from '../api/query';
 import { useAuth } from '../auth/AuthContext';
+import { ActiveTimeBar } from '../components/ActiveTimeBar';
 import { CurrentJob } from '../components/CurrentJob';
 import { JobActions } from '../components/JobActions';
 import { JobFilters } from '../components/JobFilters';
@@ -157,7 +158,9 @@ export function JobListPage() {
   const hasMore = jobs.length >= Number(params.limit);
 
   return (
-    <>
+    <div className="dashboard">
+      {loaded && <ActiveTimeBar jobs={jobs} />}
+
       <JobFilters
         params={params}
         draft={draft}
@@ -171,7 +174,7 @@ export function JobListPage() {
       {!loaded ? (
         <Spinner />
       ) : jobs.length ? (
-        <div className="dashboard">
+        <>
           <JobSection
             title="Current Job"
             icon="gear"
@@ -230,10 +233,10 @@ export function JobListPage() {
               <p className="muted">No finished jobs match.</p>
             )}
           </JobSection>
-        </div>
+        </>
       ) : (
         <div className="empty-state">No job matching</div>
       )}
-    </>
+    </div>
   );
 }

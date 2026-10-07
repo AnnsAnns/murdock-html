@@ -61,7 +61,8 @@ describe('JobListPage', () => {
     renderPage();
     expect(await screen.findByText(/core: fix the thing/)).toBeInTheDocument();
     expect(screen.getByText('Success')).toBeInTheDocument();
-    expect(screen.getByText('42s')).toBeInTheDocument();
+    // 42s appears in both the row duration and the active-time bar.
+    expect(screen.getAllByText('42s').length).toBeGreaterThan(0);
   });
 
   it('groups jobs into Current, Queued and Past sections', async () => {

@@ -1,5 +1,7 @@
 // Derives display strings from a Murdock JobModel.
 
+import { FINISHED_STATES } from './state';
+
 export function isMergeQueue(ref) {
   return Boolean(
     ref &&
@@ -218,4 +220,72 @@ export function estimateQueuedStarts(jobs, now = Date.now()) {
   }
 
   return starts;
+}
+
+/**
+ * Builds a chronological timeline of the loaded jobs for the active-time bar,
+ * oldest first. Finished jobs contribute their runtime and a running job its
+ * elapsed time; the running ETA and the queued jobs' estimated runtimes form
+ * the future. Gaps between jobs become explicit idle segments, so the bar
+ * covers wall-clock time without holes.
+ *
+ * Each segment is `{ start, end, seconds, idle, future, uid?, state? }` with
+ * `start`/`end` in milliseconds and `seconds` as the duration.
+ */
+export function activeTimeTimeline(jobs, now = Date.now()) {
+  const queuedStarts = estimateQueuedStarts(jobs, now);
+  const intervals = [];
+
+  for (const job of jobs) {
+    if (job.state === 'queued') {
+      const start = queuedStarts.get(job.uid);
+      if (start == null) continue;
+      intervals.push({
+        uid: job.uid,
+        state: job.state,
+        future: true,
+        start,
+        end: start + estimatedRuntime(job) * 1000,
+      });
+    } else if (job.state === 'running') {
+      const start = jobStartDate(job);
+      if (start && now > start.getTime()) {
+        intervals.push({ uid: job.uid, state: job.state, future: false, start: start.getTime(), end: now });
+      }
+      const eta = job.status?.eta;
+      if (eta != null && eta > 0) {
+        intervals.push({ uid: job.uid, state: job.state, future: true, start: now, end: now + eta * 1000 });
+      }
+    } else if (FINISHED_STATES.includes(job.state) && job.runtime > 0) {
+      const start = jobStartDate(job);
+      if (start) {
+        intervals.push({
+          uid: job.uid,
+          state: job.state,
+          future: false,
+          start: start.getTime(),
+          end: start.getTime() + job.runtime * 1000,
+        });
+      }
+    }
+  }
+
+  if (!intervals.length) return [];
+
+  intervals.sort((a, b) => a.start - b.start);
+
+  const segments = [];
+  let cursor = intervals[0].start;
+  for (const interval of intervals) {
+    const start = Math.max(interval.start, cursor);
+    if (start > cursor) {
+      segments.push({ idle: true, future: false, start: cursor, end: start });
+    }
+    if (interval.end > start) {
+      segments.push({ ...interval, start, end: interval.end });
+      cursor = interval.end;
+    }
+  }
+
+  return segments.map((segment) => ({ ...segment, seconds: (segment.end - segment.start) / 1000 }));
 }

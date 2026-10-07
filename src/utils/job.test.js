@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  activeTimeTimeline,
   buildProgress,
   estimateQueuedStarts,
   estimatedRuntime,
@@ -163,6 +164,52 @@ describe('estimateQueuedStarts', () => {
   it('ignores jobs that are neither running nor queued', () => {
     const starts = estimateQueuedStarts([{ uid: 'p', state: 'passed', creation_time: 1 }], now);
     expect(starts.size).toBe(0);
+  });
+});
+
+describe('activeTimeTimeline', () => {
+  const now = 1_000_000; // ms
+
+  it('orders jobs and fills idle gaps', () => {
+    const segments = activeTimeTimeline(
+      [
+        { uid: 'b', state: 'errored', start_time: 900, runtime: 100 },
+        { uid: 'a', state: 'passed', start_time: 800, runtime: 60 },
+      ],
+      now,
+    );
+
+    expect(segments.map((seg) => (seg.idle ? 'idle' : seg.uid))).toEqual(['a', 'idle', 'b']);
+    expect(segments[1].seconds).toBe(40);
+    expect(segments[1].future).toBe(false);
+  });
+
+  it('splits a running job into elapsed and expected parts', () => {
+    const segments = activeTimeTimeline(
+      [
+        {
+          uid: 'r',
+          state: 'running',
+          start_time: now / 1000 - 100,
+          status: { eta: 50 },
+        },
+      ],
+      now,
+    );
+
+    expect(segments).toHaveLength(2);
+    expect(segments[0]).toMatchObject({ uid: 'r', future: false, seconds: 100 });
+    expect(segments[1]).toMatchObject({ uid: 'r', future: true, seconds: 50 });
+  });
+
+  it('appends queued jobs as the future', () => {
+    const segments = activeTimeTimeline(
+      [{ uid: 'q', state: 'queued', env: { CI_PULL_LABELS: 'CI: skip compile test' } }],
+      now,
+    );
+
+    expect(segments).toHaveLength(1);
+    expect(segments[0]).toMatchObject({ uid: 'q', state: 'queued', future: true, seconds: 180 });
   });
 });
 
