@@ -28,9 +28,12 @@
 }
 
 .currentJob {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 8px;
+  /* Reserve the right-hand column used by the pinned progress stats. */
+  padding-right: 120px;
 
   .currentJobTitle {
     font-size: 16px;

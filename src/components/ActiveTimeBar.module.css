@@ -27,18 +27,18 @@
     letter-spacing: 0.5px;
   }
 
-  /* Ticking durations get a reserved, right-aligned slot so their width stays
-     put as the seconds change. The flex box may still shrink when the panel
-     runs out of room. */
+  /* The body font has proportional digits, so a fixed-width, right-aligned
+     slot is what keeps each ticking figure from resizing the rest of the row.
+     The slot is wide enough for "23h 59m 59s" with room to spare. */
   .activeTimeValue {
     display: inline-block;
-    min-width: 9ch;
+    width: 13ch;
     text-align: right;
   }
 
   .activeTimeTotal {
-    flex: 0 1 auto;
-    min-width: 9ch;
+    flex: 0 0 auto;
+    width: 13ch;
     font-weight: 600;
     text-align: right;
   }
@@ -55,8 +55,9 @@
   }
 
   .activeTimeUtil {
-    flex: 0 1 auto;
-    min-width: 11ch;
+    flex: 0 0 auto;
+    /* 12ch of text plus the pill's horizontal padding (border-box). */
+    width: calc(12ch + 16px);
     padding: 1px 8px;
     border-radius: 999px;
     background: color-mix(in srgb, var(--box-color-standard) 30%, transparent);

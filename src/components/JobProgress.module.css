@@ -55,15 +55,37 @@
   }
 }
 
-/* Live fail / pass / done counters. Tabular digits keep the numbers from
-   changing width as they tick, so the row and progress bar stay put. */
+/* The progress track keeps a fixed footprint; the live counters no longer
+   feed into its width. */
+.progressTrack {
+  flex: 1 1 320px;
+  min-width: 200px;
+}
+
+/* Live fail / pass / done counters. The body font has proportional digits, so
+   the column gets a fixed width wide enough for "9999/9999" plus its icon;
+   ticking numbers then never resize it or the progress track beside it. */
 .progressStats {
   display: inline-flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 2px;
+  width: 112px;
+  font-size: 14px;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+}
+
+/* Current Job: pin the column to the panel's right edge, spanning it top to
+   bottom, so the vertical stats reuse the panel's height instead of growing
+   it (and the track keeps its width). */
+.progressStatsCorner {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  align-items: flex-end;
+  justify-content: space-between;
 }
 
 .progressStat {
