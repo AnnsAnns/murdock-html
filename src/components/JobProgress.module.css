@@ -8,11 +8,11 @@
   background: color-mix(in srgb, var(--base-text-color) 15%, var(--base-background-color));
   overflow: hidden;
 
-  &.is-tall {
+  &.isTall {
     height: 22px;
   }
 
-  .progress-bar {
+  .progressBar {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -24,7 +24,7 @@
     transition: width 0.3s ease;
   }
 
-  .progress-bar.is-striped {
+  .progressBar.isStriped {
     background-image: linear-gradient(
       45deg,
       var(--progress-stripe) 25%,
@@ -50,7 +50,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .progress .progress-bar.is-striped {
+  .progress .progressBar.isStriped {
     animation: none;
   }
 }

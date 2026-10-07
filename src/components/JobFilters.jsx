@@ -1,4 +1,7 @@
 import { JOB_TYPES } from '../api/query';
+import box from '../styles/box.module.css';
+import controls from '../styles/controls.module.css';
+import filters from './JobFilters.module.css';
 import { STATES, stateIcon, stateLabel } from '../utils/state';
 import { Icon } from './Icon';
 
@@ -19,23 +22,25 @@ export function JobFilters({
     if (event.key === 'Enter') onCommit();
   };
 
+  const inputClass = `${controls.input} ${filters.filterInput}`;
+
   return (
-    <section className="box filter-panel">
-      <div className="box-title">
+    <section className={`${box.box} ${filters.filterPanel}`}>
+      <div className={box.boxTitle}>
         <Icon name="search" size={14} />
-        <span className="title-label">Filters</span>
+        <span className={box.titleLabel}>Filters</span>
       </div>
 
-      <div className="box-body">
-        <div className="filter-bar">
-          <div className="filter-group">
-            <span className="filter-label">Type</span>
-            <div className="segmented" role="group" aria-label="Job type">
+      <div className={`${box.boxBody} ${filters.filterBody}`}>
+        <div className={filters.filterBar}>
+          <div className={filters.filterGroup}>
+            <span className={filters.filterLabel}>Type</span>
+            <div className={filters.segmented} role="group" aria-label="Job type">
               {JOB_TYPES.map((type) => (
                 <button
                   key={type}
                   type="button"
-                  className={params.type === type ? 'is-on' : ''}
+                  className={params.type === type ? filters.isOn : ''}
                   aria-pressed={params.type === type}
                   onClick={() => onType(type)}
                 >
@@ -45,16 +50,16 @@ export function JobFilters({
             </div>
           </div>
 
-          <div className="filter-group">
-            <span className="filter-label">States</span>
-            <div className="toolbar-group" role="group" aria-label="Job states">
+          <div className={filters.filterGroup}>
+            <span className={filters.filterLabel}>States</span>
+            <div className={filters.toolbarGroup} role="group" aria-label="Job states">
               {STATES.map((state) => {
                 const on = params.states.includes(state);
                 return (
                   <button
                     key={state}
                     type="button"
-                    className={`toggle ${on ? 'is-on' : ''}`}
+                    className={`${filters.toggle} ${on ? filters.isOn : ''}`}
                     data-state={state}
                     aria-pressed={on}
                     title={`${on ? 'Hide' : 'Show'} ${stateLabel(state).toLowerCase()} jobs`}
@@ -67,12 +72,12 @@ export function JobFilters({
             </div>
           </div>
 
-          <div className="input-group">
-            <span className="input-group-addon">
+          <div className={controls.inputGroup}>
+            <span className={controls.inputGroupAddon}>
               <Icon name="tag" />
             </span>
             <input
-              className="input"
+              className={inputClass}
               type="text"
               placeholder="Commit SHA"
               aria-label="Commit SHA"
@@ -82,12 +87,12 @@ export function JobFilters({
             />
           </div>
 
-          <div className="input-group">
-            <span className="input-group-addon">
+          <div className={controls.inputGroup}>
+            <span className={controls.inputGroupAddon}>
               <Icon name="person" />
             </span>
             <input
-              className="input"
+              className={inputClass}
               type="text"
               placeholder="Commit author"
               aria-label="Commit author"
@@ -99,10 +104,10 @@ export function JobFilters({
 
           {params.type === 'pr' && (
             <>
-              <div className="input-group">
-                <span className="input-group-addon">PR #</span>
+              <div className={controls.inputGroup}>
+                <span className={controls.inputGroupAddon}>PR #</span>
                 <input
-                  className="input"
+                  className={inputClass}
                   type="text"
                   placeholder="PR number"
                   aria-label="PR number"
@@ -111,10 +116,10 @@ export function JobFilters({
                   onKeyDown={onKeyDown}
                 />
               </div>
-              <div className="toolbar-group" role="group" aria-label="PR state">
+              <div className={filters.toolbarGroup} role="group" aria-label="PR state">
                 <button
                   type="button"
-                  className={`toggle ${params.prstates.open ? 'is-on' : ''}`}
+                  className={`${filters.toggle} ${params.prstates.open ? filters.isOn : ''}`}
                   aria-pressed={params.prstates.open}
                   onClick={() => onTogglePrState('open')}
                 >
@@ -122,7 +127,7 @@ export function JobFilters({
                 </button>
                 <button
                   type="button"
-                  className={`toggle ${params.prstates.closed ? 'is-on' : ''}`}
+                  className={`${filters.toggle} ${params.prstates.closed ? filters.isOn : ''}`}
                   aria-pressed={params.prstates.closed}
                   onClick={() => onTogglePrState('closed')}
                 >
@@ -133,10 +138,10 @@ export function JobFilters({
           )}
 
           {params.type === 'branch' && (
-            <div className="input-group">
-              <span className="input-group-addon">Branch</span>
+            <div className={controls.inputGroup}>
+              <span className={controls.inputGroupAddon}>Branch</span>
               <input
-                className="input"
+                className={inputClass}
                 type="text"
                 placeholder="Branch name"
                 aria-label="Branch name"
@@ -148,10 +153,10 @@ export function JobFilters({
           )}
 
           {params.type === 'tag' && (
-            <div className="input-group">
-              <span className="input-group-addon">Tag</span>
+            <div className={controls.inputGroup}>
+              <span className={controls.inputGroupAddon}>Tag</span>
               <input
-                className="input"
+                className={inputClass}
                 type="text"
                 placeholder="Tag name"
                 aria-label="Tag name"
@@ -162,7 +167,11 @@ export function JobFilters({
             </div>
           )}
 
-          <button type="button" className="btn filter-search" onClick={onCommit}>
+          <button
+            type="button"
+            className={`${controls.btn} ${filters.filterSearch}`}
+            onClick={onCommit}
+          >
             <Icon name="search" />
             <span>Search</span>
           </button>

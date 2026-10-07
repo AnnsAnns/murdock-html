@@ -1,4 +1,6 @@
 import { Link } from 'react-router-dom';
+import controls from '../styles/controls.module.css';
+import menu from './Menu.module.css';
 import { FINISHED_STATES } from '../utils/state';
 import { Icon } from './Icon';
 import { Menu } from './Menu';
@@ -24,18 +26,29 @@ export function jobAction(state) {
  *   everyone — it always offers "Open full page" and only adds the maintainer
  *   action when `canManage` is set.
  */
-export function JobActions({ job, canManage = false, onAction, busy = false, variant = 'buttons' }) {
+export function JobActions({
+  job,
+  canManage = false,
+  onAction,
+  busy = false,
+  variant = 'buttons',
+  triggerClassName,
+}) {
   const action = jobAction(job.state);
 
   if (variant === 'menu') {
     return (
-      <Menu label="Job actions" trigger={<Icon name="more" />}>
-        <Link className="menu-item" to={`/details/${job.uid}`}>
+      <Menu label="Job actions" trigger={<Icon name="more" />} triggerClassName={triggerClassName}>
+        <Link className={menu.menuItem} to={`/details/${job.uid}`}>
           <Icon name="external" />
           <span>Open full page</span>
         </Link>
         {canManage && action && (
-          <button type="button" className="menu-item" onClick={() => onAction(action.action)}>
+          <button
+            type="button"
+            className={menu.menuItem}
+            onClick={() => onAction(action.action)}
+          >
             <Icon name={action.icon} />
             <span>{action.label}</span>
           </button>
@@ -49,7 +62,7 @@ export function JobActions({ job, canManage = false, onAction, busy = false, var
   return (
     <button
       type="button"
-      className="btn btn--sm"
+      className={`${controls.btn} ${controls.btnSm} ${controls.btnOnAccent}`}
       disabled={busy}
       onClick={() => onAction(action.action)}
     >

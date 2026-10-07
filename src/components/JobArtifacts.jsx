@@ -1,14 +1,16 @@
 import { API_BASE } from '../api/config';
+import card from '../styles/card.module.css';
+import results from '../styles/results.module.css';
 import { Icon } from './Icon';
 
 export function JobArtifacts({ job }) {
   const artifacts = job.artifacts ?? [];
 
   return (
-    <div className="card">
-      <div className="card-body">
+    <div className={card.card}>
+      <div className={card.cardBody}>
         {artifacts.length ? (
-          <ul className="artifact-list">
+          <ul className={results.artifactList}>
             {artifacts.map((artifact) => (
               <li key={artifact}>
                 <a

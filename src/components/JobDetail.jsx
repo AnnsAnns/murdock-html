@@ -2,6 +2,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { deleteJob, getJob, getResultFile, restartJob } from '../api/murdock';
 import { useAuth } from '../auth/AuthContext';
+import box from '../styles/box.module.css';
+import controls from '../styles/controls.module.css';
+import jobDetail from './JobInfo.module.css';
+import misc from '../styles/misc.module.css';
+import tabs from './JobDetail.module.css';
 import { FailedJobs } from './FailedJobs';
 import { Icon } from './Icon';
 import { JobArtifacts } from './JobArtifacts';
@@ -25,14 +30,14 @@ const RESULT_TABS = ['builds', 'tests', 'output', 'artifacts', 'details', 'stats
 function Tab({ id, active, label, icon, tone, badge = 0, href, onSelect }) {
   const inner = (
     <>
-      <span data-state={tone} className={tone ? 'state-fg' : undefined}>
+      <span data-state={tone} className={tone ? controls.stateFg : undefined}>
         <Icon name={icon} />
       </span>
       {label}
-      {badge > 0 && <span className="tab-badge">{badge}</span>}
+      {badge > 0 && <span className={misc.tabBadge}>{badge}</span>}
     </>
   );
-  const className = `tab ${active ? 'is-active' : ''}`;
+  const className = `${tabs.tab} ${active ? tabs.isActive : ''}`;
 
   if (href) {
     return (
@@ -232,9 +237,9 @@ export function JobDetail({ path, activeTab: controlledTab, tabHref, onSelectTab
 
   return (
     <>
-      <article className="box job-header" data-state={job.state}>
+      <article className={`${box.box} ${jobDetail.jobHeader}`} data-state={job.state}>
         <JobHeader job={job} canManage={canManage} onAction={onAction} busy={busy} />
-        <div className="box-body">
+        <div className={box.boxBody}>
           <JobInfo job={job} />
           <JobProgress job={job} status={status} />
           <JobSummary
@@ -252,8 +257,8 @@ export function JobDetail({ path, activeTab: controlledTab, tabHref, onSelectTab
 
       <FailedJobs jobs={status?.failed_jobs} />
 
-      <div className="m-2">
-        <nav className="tabs" aria-label="Job sections">
+      <div>
+        <nav className={tabs.tabs} aria-label="Job sections">
           {buildsAvailable && (
             <Tab
               id="builds"
@@ -320,7 +325,7 @@ export function JobDetail({ path, activeTab: controlledTab, tabHref, onSelectTab
           )}
         </nav>
 
-        <div className="tab-panel">
+        <div className={tabs.tabPanel}>
           {activeTab === 'output' && outputAvailable && <JobOutput job={job} output={output} />}
           {activeTab === 'builds' && buildsAvailable && (
             <JobBuilds

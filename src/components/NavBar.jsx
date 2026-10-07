@@ -1,6 +1,7 @@
 import { Link, NavLink } from 'react-router-dom';
 import { API_BASE, GITHUB_REPO_URL, PRIVACY_URL } from '../api/config';
 import frog from '../imgs/frog.webp';
+import controls from '../styles/controls.module.css';
 import { Icon } from './Icon';
 import { GithubLoginButton } from '../auth/GithubLoginButton';
 
@@ -26,7 +27,7 @@ export function NavBar() {
 
       <div className="topbar-actions">
         <a
-          className="icon-btn"
+          className={controls.iconBtn}
           href={GITHUB_REPO_URL}
           target="_blank"
           rel="noreferrer noopener"

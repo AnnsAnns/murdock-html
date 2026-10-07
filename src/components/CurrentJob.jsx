@@ -1,5 +1,8 @@
 import { Link } from 'react-router-dom';
 import { GITHUB_REPO } from '../api/config';
+import dashboard from './JobListPage.module.css';
+import jobDetail from './JobInfo.module.css';
+import controls from '../styles/controls.module.css';
 import { formatDayMonthTime } from '../utils/format';
 import { jobEnd, jobRefLink, jobStartDate, jobTitle } from '../utils/job';
 import { Icon } from './Icon';
@@ -15,15 +18,15 @@ export function CurrentJob({ job }) {
   const end = jobEnd(job);
 
   return (
-    <div className="current-job">
-      <Link className="current-job-title" to={`/details/${job.uid}`}>
+    <div className={dashboard.currentJob}>
+      <Link className={dashboard.currentJobTitle} to={`/details/${job.uid}`}>
         {jobTitle(job)}
       </Link>
 
-      <div className="job-info">
+      <div className={jobDetail.jobInfo}>
         {refLink && (
           <a
-            className="ref-link"
+            className={controls.refLink}
             href={refLink.url}
             target="_blank"
             rel="noreferrer noopener"
@@ -33,18 +36,21 @@ export function CurrentJob({ job }) {
             <span>{refLink.label}</span>
           </a>
         )}
-        <span className="job-info-item">
+        <span className={jobDetail.jobInfoItem}>
           <Icon name="tag" />
           <span className="mono">{job.commit.sha.slice(0, 7)}</span>
         </span>
         {start && (
-          <span className="job-info-item">
+          <span className={jobDetail.jobInfoItem}>
             <Icon name="calendar" />
             Started {formatDayMonthTime(start)}
           </span>
         )}
         {end && (
-          <span className="job-info-item" title={end.estimated ? 'Estimated end time' : undefined}>
+          <span
+            className={jobDetail.jobInfoItem}
+            title={end.estimated ? 'Estimated end time' : undefined}
+          >
             <Icon name="clock" />
             {end.estimated ? `Ends ~${formatDayMonthTime(end.date)}` : `Ended ${formatDayMonthTime(end.date)}`}
           </span>

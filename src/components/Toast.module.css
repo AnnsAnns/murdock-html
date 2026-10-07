@@ -24,23 +24,23 @@
     4px 4px 0 0 color-mix(in srgb, var(--box-color-standard) 50%, transparent);
   animation: toast-in 0.18s ease;
 
-  &.is-danger {
+  &.isDanger {
     --box-color-standard: var(--state-errored);
   }
 
-  &.is-info {
+  &.isInfo {
     --box-color-standard: var(--state-queued);
   }
 
-  .toast-icon {
+  .toastIcon {
     flex: 0 0 auto;
   }
 
-  &.is-danger .toast-icon {
+  &.isDanger .toastIcon {
     color: var(--state-errored);
   }
 
-  &.is-info .toast-icon {
+  &.isInfo .toastIcon {
     color: var(--state-queued);
   }
 }
@@ -49,29 +49,5 @@
   from {
     opacity: 0;
     translate: 0 8px;
-  }
-}
-/* ============================================================
-   Auth
-   ============================================================ */
-.avatar {
-  width: 28px;
-  height: 28px;
-  border-radius: var(--radius);
-  display: block;
-}
-
-.user-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 2px;
-  border: none;
-  border-radius: var(--radius);
-  background: transparent;
-  cursor: pointer;
-
-  &:hover {
-    background: color-mix(in srgb, var(--box-color-standard) 35%, transparent);
   }
 }

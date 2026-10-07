@@ -1,5 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import card from '../styles/card.module.css';
+import controls from '../styles/controls.module.css';
+import results from '../styles/results.module.css';
 import { stateIcon } from '../utils/state';
 import { Icon } from './Icon';
 import { Result } from './Result';
@@ -8,21 +11,21 @@ function ApplicationRow({ uid, type, name, success, failures }) {
   const state = failures ? 'errored' : 'passed';
   return (
     <Link
-      className="application-row"
+      className={results.applicationRow}
       to={`/details/${uid}/${type}/${encodeURIComponent(name.replaceAll('/', ':'))}`}
     >
-      <span className="state-fg" data-state={state}>
+      <span className={controls.stateFg} data-state={state}>
         <Icon name={stateIcon(state)} />
       </span>
-      <span className="application-name">{name}</span>
-      <span className="application-counts">
+      <span className={results.applicationName}>{name}</span>
+      <span className={results.applicationCounts}>
         {failures > 0 && (
-          <span className="state-pill" data-state="errored">
+          <span className={controls.statePill} data-state="errored">
             {failures} failed
           </span>
         )}
         {success > 0 && (
-          <span className="state-pill" data-state="passed">
+          <span className={controls.statePill} data-state="passed">
             {success} success
           </span>
         )}
@@ -57,20 +60,20 @@ function ResultsList({ kind, uid, results, failures, liveFailures, job, stats })
   return (
     <>
       {(effectiveFailures?.length ?? 0) > 0 && (
-        <div className="card is-danger">
-          <div className="card-header is-danger">
+        <div className={`${card.card} ${card.isDanger}`}>
+          <div className={`${card.cardHeader} ${card.isDanger}`}>
             <span>
               Failed {noun} ({failed.length}/{total ?? '?'})
             </span>
             <input
-              className="input"
+              className={controls.input}
               type="text"
               placeholder={`Filter failed ${noun}`}
               value={failuresFilter}
               onChange={(event) => setFailuresFilter(event.target.value)}
             />
           </div>
-          <div className="card-body">
+          <div className={card.cardBody}>
             {failed.map((result) => (
               <Result
                 key={`${result.application}-${result.target}-${result.toolchain}`}
@@ -85,13 +88,13 @@ function ResultsList({ kind, uid, results, failures, liveFailures, job, stats })
       )}
 
       {['running', 'stopped'].includes(job.state) && live.length > 0 && (
-        <div className="card is-danger">
-          <div className="card-header is-danger">
+        <div className={`${card.card} ${card.isDanger}`}>
+          <div className={`${card.cardHeader} ${card.isDanger}`}>
             <span>
               Failed {noun} ({live.length})
             </span>
           </div>
-          <div className="card-body">
+          <div className={card.cardBody}>
             {live.map((result) => (
               <Result
                 key={`${result.application}-${result.target}-${result.toolchain}`}
@@ -106,18 +109,18 @@ function ResultsList({ kind, uid, results, failures, liveFailures, job, stats })
       )}
 
       {['errored', 'passed'].includes(job.state) && (
-        <div className="card">
-          <div className="card-header">
+        <div className={card.card}>
+          <div className={card.cardHeader}>
             <span>Applications ({list.length})</span>
             <input
-              className="input"
+              className={controls.input}
               type="text"
               placeholder="Filter applications"
               value={filter}
               onChange={(event) => setFilter(event.target.value)}
             />
           </div>
-          <div className="card-body">
+          <div className={card.cardBody}>
             {list.map((result) => (
               <ApplicationRow
                 key={result.application}

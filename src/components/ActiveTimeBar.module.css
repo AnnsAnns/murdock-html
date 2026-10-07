@@ -1,7 +1,7 @@
 /* ============================================================
    Active time bar
    ============================================================ */
-.active-time {
+.activeTime {
   margin: 4px;
   padding: 8px 12px;
   background: var(--base-background-color);
@@ -10,7 +10,7 @@
     0 0 0 3px var(--box-color-standard),
     4px 4px 0 0 color-mix(in srgb, var(--box-color-standard) 45%, transparent);
 
-  .active-time-head {
+  .activeTimeHead {
     display: flex;
     align-items: baseline;
     flex-wrap: wrap;
@@ -19,29 +19,29 @@
     font-size: 13px;
   }
 
-  .active-time-title {
+  .activeTimeTitle {
     margin-right: auto;
     font-family: var(--font-headerf);
     font-size: 15px;
     letter-spacing: 0.5px;
   }
 
-  .active-time-total {
+  .activeTimeTotal {
     font-weight: 600;
   }
 
-  .active-time-future {
+  .activeTimeFuture {
     opacity: 0.7;
   }
 
-  .active-time-util {
+  .activeTimeUtil {
     padding: 1px 8px;
     border-radius: 999px;
     background: color-mix(in srgb, var(--box-color-standard) 30%, transparent);
     font-weight: 600;
   }
 
-  .active-time-bar {
+  .activeTimeBar {
     display: flex;
     height: 14px;
     border-radius: 999px;
@@ -49,14 +49,14 @@
     background: color-mix(in srgb, var(--base-text-color) 8%, transparent);
   }
 
-  .active-time-seg {
+  .activeTimeSeg {
     display: block;
     flex-basis: 0;
     min-width: 3px;
     background: var(--state-color, var(--box-color-standard));
 
     /* Idle stretches (nothing running) get a neutral hatch. */
-    &.is-idle {
+    &.isIdle {
       background: repeating-linear-gradient(
         -45deg,
         color-mix(in srgb, var(--base-text-color) 16%, transparent) 0 3px,
@@ -65,7 +65,7 @@
     }
 
     /* The expected future is drawn with a diagonal stripe overlay. */
-    &.is-future {
+    &.isFuture {
       background-image: repeating-linear-gradient(
         45deg,
         var(--overlay-strong) 0 2px,
@@ -74,7 +74,7 @@
     }
   }
 
-  a.active-time-seg {
+  a.activeTimeSeg {
     cursor: pointer;
 
     &:hover {

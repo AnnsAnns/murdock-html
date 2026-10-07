@@ -1,4 +1,6 @@
 import { GITHUB_REPO } from '../api/config';
+import controls from '../styles/controls.module.css';
+import jobDetail from './JobInfo.module.css';
 import { formatDayMonthTime, formatEta, preciseDuration, relativeTime } from '../utils/format';
 import { jobEnd, jobRefLink, jobStartDate } from '../utils/job';
 import { CommitMessage } from './CommitMessage';
@@ -16,11 +18,11 @@ export function JobInfo({ job }) {
 
   return (
     <div>
-      <div className="job-info">
-        <span className="job-info-item">
+      <div className={jobDetail.jobInfo}>
+        <span className={jobDetail.jobInfoItem}>
           <Icon name="tag" />
           <a
-            className="link"
+            className={controls.link}
             href={`https://github.com/${GITHUB_REPO}/commit/${job.commit.sha}`}
             target="_blank"
             rel="noreferrer noopener"
@@ -32,7 +34,7 @@ export function JobInfo({ job }) {
 
         {refLink && (
           <a
-            className="ref-link"
+            className={controls.refLink}
             href={refLink.url}
             target="_blank"
             rel="noreferrer noopener"
@@ -43,19 +45,19 @@ export function JobInfo({ job }) {
           </a>
         )}
 
-        <span className="job-info-item">
+        <span className={jobDetail.jobInfoItem}>
           <Icon name="person" />
           {job.commit.author}
         </span>
         {start && (
-          <span className="job-info-item" title={relativeTime(start)}>
+          <span className={jobDetail.jobInfoItem} title={relativeTime(start)}>
             <Icon name="calendar" />
             {job.state === 'queued' ? 'Queued' : 'Started'} {formatDayMonthTime(start)}
           </span>
         )}
         {end && (
           <span
-            className="job-info-item"
+            className={jobDetail.jobInfoItem}
             title={end.estimated ? 'Estimated end time' : relativeTime(end.date)}
           >
             <Icon name="calendar" />
@@ -64,21 +66,21 @@ export function JobInfo({ job }) {
           </span>
         )}
         {duration && (
-          <span className="job-info-item">
+          <span className={jobDetail.jobInfoItem}>
             <Icon name="clock" />
             {duration}
           </span>
         )}
       </div>
 
-      <div className="job-commit-message">
+      <div className={jobDetail.jobCommitMessage}>
         <Icon name="cardText" /> <CommitMessage message={job.commit.message} />
       </div>
 
       {job.prinfo?.labels?.length > 0 && (
-        <div className="labels">
+        <div className={jobDetail.labels}>
           {job.prinfo.labels.map((label) => (
-            <span key={label} className="pill">
+            <span key={label} className={controls.pill}>
               {label}
             </span>
           ))}

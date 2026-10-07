@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
+import styles from './Menu.module.css';
 
 /** Small click-outside dropdown used for maintainer job actions. */
-export function Menu({ trigger, children, label = 'Actions' }) {
+export function Menu({ trigger, children, label = 'Actions', triggerClassName = '' }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
@@ -22,10 +23,10 @@ export function Menu({ trigger, children, label = 'Actions' }) {
   }, [open]);
 
   return (
-    <div className="menu" ref={ref}>
+    <div className={styles.menu} ref={ref}>
       <button
         type="button"
-        className="menu-trigger"
+        className={`${styles.menuTrigger}${triggerClassName ? ` ${triggerClassName}` : ''}`}
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label={label}
@@ -34,7 +35,7 @@ export function Menu({ trigger, children, label = 'Actions' }) {
         {trigger}
       </button>
       {open && (
-        <div className="menu-items" onClick={() => setOpen(false)}>
+        <div className={styles.menuItems} onClick={() => setOpen(false)}>
           {children}
         </div>
       )}

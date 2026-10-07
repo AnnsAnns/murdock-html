@@ -1,4 +1,5 @@
 import { Icon } from './Icon';
+import controls from '../styles/controls.module.css';
 import { stateIcon, stateLabel } from '../utils/state';
 
 /**
@@ -12,7 +13,7 @@ export function StateBadge({ state, count = 0, compact = false, iconOnly = false
 
   return (
     <span
-      className="state-badge"
+      className={controls.stateBadge}
       data-state={state}
       title={count > 0 ? `${label} — ${count} failures reported` : label}
     >

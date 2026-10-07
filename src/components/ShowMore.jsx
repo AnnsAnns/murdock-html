@@ -1,7 +1,10 @@
+import controls from '../styles/controls.module.css';
+import misc from '../styles/misc.module.css';
+
 export function ShowMore({ onClick }) {
   return (
-    <div className="show-more">
-      <button type="button" className="btn" onClick={onClick}>
+    <div className={misc.showMore}>
+      <button type="button" className={controls.btn} onClick={onClick}>
         Show more
       </button>
     </div>

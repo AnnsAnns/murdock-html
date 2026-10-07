@@ -1,4 +1,5 @@
 import { Fragment } from 'react';
+import styles from './JobRow.module.css';
 import { JobDetail } from './JobDetail';
 import { JobRow } from './JobRow';
 
@@ -13,7 +14,7 @@ export function JobList({
 }) {
   return (
     <>
-      <div className="job-list-head" aria-hidden="true">
+      <div className={styles.jobListHead} aria-hidden="true">
         <span>Ref</span>
         <span>Title</span>
         <span>Start Date</span>
@@ -21,7 +22,7 @@ export function JobList({
         <span>Duration</span>
         <span className="text-end">State</span>
       </div>
-      <ul className="job-list">
+      <ul className={styles.jobList}>
         {jobs.map((job) => {
           const expanded = expandedUid === job.uid;
           return (
@@ -35,7 +36,7 @@ export function JobList({
                 onToggle={() => onToggleExpand?.(job.uid)}
               />
               {expanded && (
-                <li className="job-embed" data-state={job.state}>
+                <li className={styles.jobEmbed} data-state={job.state}>
                   {/* Mounted on demand, so nothing is fetched until expanded. */}
                   <JobDetail path={job.uid} />
                 </li>

@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { API_BASE } from '../api/config';
 import { fetchText, getResultOutputUrl } from '../api/murdock';
+import controls from '../styles/controls.module.css';
+import results from '../styles/results.module.css';
 import { stateIcon } from '../utils/state';
 import { Icon } from './Icon';
 
@@ -26,8 +28,8 @@ export function Result({ uid, type, result, withApplication = false }) {
   if (!hasDetails) {
     if (withApplication && result.application) {
       return (
-        <div className="application-row">
-          <span className="application-name">{result.application}</span>
+        <div className={results.applicationRow}>
+          <span className={results.applicationName}>{result.application}</span>
         </div>
       );
     }
@@ -37,17 +39,17 @@ export function Result({ uid, type, result, withApplication = false }) {
   const state = result.status ? 'passed' : 'errored';
 
   return (
-    <div className="result">
+    <div className={results.result}>
       <button
         type="button"
-        className="result-head"
+        className={results.resultHead}
         aria-expanded={open}
         title={`${open ? 'Hide' : 'Show'} output`}
         onClick={toggle}
       >
         {withApplication && (
           <span className="row" style={{ gap: 6 }} data-state={state}>
-            <span className="state-fg">
+            <span className={controls.stateFg}>
               <Icon name={stateIcon(state)} />
             </span>
             <span className="truncate">{result.application}</span>
@@ -55,7 +57,7 @@ export function Result({ uid, type, result, withApplication = false }) {
         )}
         <span className="row" style={{ gap: 6 }}>
           {!withApplication && (
-            <span className="state-fg" data-state={state}>
+            <span className={controls.stateFg} data-state={state}>
               <Icon name={stateIcon(state)} />
             </span>
           )}
@@ -75,9 +77,9 @@ export function Result({ uid, type, result, withApplication = false }) {
       </button>
 
       {open && (
-        <div className="result-output">
+        <div className={results.resultOutput}>
           <a
-            className="icon-btn result-open"
+            className={`${controls.iconBtn} ${results.resultOpen}`}
             href={`${API_BASE}${outputPath}`}
             target="_blank"
             rel="noreferrer noopener"

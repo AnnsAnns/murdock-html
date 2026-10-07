@@ -85,11 +85,13 @@ dashboard needs no login at all.
 src/
   api/        REST client, endpoints, query <-> URL serialisation
   auth/       GitHub OAuth context and helpers
-  components/ presentational UI (job list/rows, tabs, results, toasts, ...)
+  components/ presentational UI; each component has a co-located
+              <Component>.module.css (CSS Modules, camelCase classes, imported
+              directly in the JSX)
   hooks/      WebSocket, document title
   pages/      routed pages (job list, job detail, application results)
-  styles/     index.css barrel + tokens.css; base/ and components/ modules
-              (native CSS nesting, one file per concern)
+  styles/     index.css (global barrel) + tokens.css; base/ global layout;
+              shared design-system modules (controls, box, card, results, misc)
   utils/      formatting and job helpers
 gatekeeper/   Cloudflare Worker that exchanges the OAuth code for a token
 ```

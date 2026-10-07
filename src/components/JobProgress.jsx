@@ -1,3 +1,5 @@
+import jobDetail from './JobInfo.module.css';
+import progressStyles from './JobProgress.module.css';
 import { buildProgress } from '../utils/job';
 import { Icon } from './Icon';
 
@@ -13,7 +15,7 @@ export function JobProgress({ job, status }) {
     if (!status.status) return null;
     return (
       <div className="row" style={{ marginTop: 8 }}>
-        <span className="job-info-item">
+        <span className={jobDetail.jobInfoItem}>
           <Icon name="transfer" />
           {status.status}
         </span>
@@ -25,9 +27,11 @@ export function JobProgress({ job, status }) {
     <div className="row" style={{ marginTop: 10, gap: 16, alignItems: 'center' }}>
       {['running', 'stopped'].includes(job.state) && (
         <div style={{ flex: '1 1 320px', minWidth: 200 }}>
-          <div className="progress is-tall">
+          <div className={`${progressStyles.progress} ${progressStyles.isTall}`}>
             <div
-              className={`progress-bar ${job.state === 'running' ? 'is-striped' : ''}`}
+              className={`${progressStyles.progressBar} ${
+                job.state === 'running' ? progressStyles.isStriped : ''
+              }`}
               data-state={progress.failed ? 'errored' : 'running'}
               style={{ width: `${progress.percent}%` }}
             >
@@ -36,7 +40,7 @@ export function JobProgress({ job, status }) {
           </div>
         </div>
       )}
-      <span className="job-info-item">
+      <span className={jobDetail.jobInfoItem}>
         <Icon name="chart" />
         {`fail: ${progress.failed} pass: ${progress.passed} done: ${progress.done}/${progress.total}`}
       </span>

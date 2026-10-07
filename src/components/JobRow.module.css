@@ -1,22 +1,22 @@
 /* ============================================================
    Job list (table-like grid that collapses into cards)
    ============================================================ */
-.job-list {
+.jobList {
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-.job-list-head,
-.job-row {
+.jobListHead,
+.jobRow {
   display: grid;
   grid-template-columns: 132px minmax(0, 1fr) 115px 115px 150px 156px;
   gap: 12px;
   align-items: center;
-  padding: 9px 12px;
+  padding: 9px 0;
 }
 
-.job-list-head {
+.jobListHead {
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -24,7 +24,7 @@
   border-bottom: 2px solid var(--border);
 }
 
-.job-row {
+.jobRow {
   position: relative;
   /* A tiny wash in the job's own state colour (faint red for failures, etc.). */
   --row-tint: var(--state-color, var(--box-color-standard));
@@ -40,33 +40,34 @@
     background: color-mix(in srgb, var(--row-tint) 12%, transparent);
   }
 
-  &.is-expanded {
+  &.isExpanded {
     background: color-mix(in srgb, var(--row-tint) 16%, transparent);
   }
 }
 
 /* Ref badge (PR / merge queue / branch): same box size as the state badge. */
-.job-ref {
+.jobRef {
   display: flex;
   min-width: 0;
 
-  .ref-link {
+  /* Applied to the ref-link inside a row. */
+  .jobRefLink {
     width: 120px;
     max-width: 100%;
     justify-content: center;
     padding: 4px 9px;
     gap: 6px;
   }
+}
 
-  .ref-link-label {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+.refLinkLabel {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Expand/collapse control; the whole row is also clickable. */
-.job-expand {
+.jobExpand {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -90,65 +91,66 @@
     background: color-mix(in srgb, var(--row-tint, var(--base-text-color)) 24%, transparent);
   }
 
-  svg.is-open {
+  svg.isOpen {
     transform: rotate(180deg);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .job-expand svg {
+  .jobExpand svg {
     transition: none;
   }
 }
 
 /* Inline detail view that unfolds under a row (fetched only when opened). */
-.job-embed {
+.jobEmbed {
   list-style: none;
   padding: 10px 10px 12px;
   background: color-mix(in srgb, var(--base-text-color) 4%, transparent);
   box-shadow: inset 0 3px 0 0 color-mix(in srgb, var(--box-color-standard) 55%, transparent);
 }
 
-.job-title {
+.jobTitle {
   display: flex;
   align-items: center;
   gap: 6px;
   min-width: 0;
 
-  .job-title-text {
+  .jobTitleText {
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  .github-mark {
+  .githubMark {
     flex: 0 0 auto;
   }
 }
 
-.job-start,
-.job-end {
+.jobStart,
+.jobEnd {
   font-size: 13px;
   opacity: 0.85;
 }
 
-.job-duration {
+.jobDuration {
   font-size: 13px;
-
-  .progress {
-    margin-top: 4px;
-  }
 }
 
-.job-state {
+/* Applied to the progress bar inside the duration cell. */
+.durationProgress {
+  margin-top: 4px;
+}
+
+.jobState {
   display: flex;
   align-items: center;
   justify-content: flex-end;
   gap: 4px;
 
-  /* The maintainer actions sit behind a compact "..." menu next to the badge. */
-  .menu-trigger {
+  /* Applied to the "..." menu trigger inside the state cell. */
+  .stateTrigger {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -165,11 +167,11 @@
 }
 
 @media (max-width: 860px) {
-  .job-list-head {
+  .jobListHead {
     display: none;
   }
 
-  .job-row {
+  .jobRow {
     grid-template-columns: minmax(0, 1fr) auto;
     grid-template-areas:
       "ref state"
@@ -180,19 +182,19 @@
     align-items: start;
   }
 
-  .job-duration {
+  .jobDuration {
     display: none;
   }
 
-  .job-ref {
+  .jobRef {
     grid-area: ref;
   }
 
-  .job-title {
+  .jobTitle {
     grid-area: title;
   }
 
-  .job-start {
+  .jobStart {
     grid-area: start;
 
     &::before {
@@ -201,7 +203,7 @@
     }
   }
 
-  .job-end {
+  .jobEnd {
     grid-area: end;
 
     &::before {
@@ -210,7 +212,7 @@
     }
   }
 
-  .job-state {
+  .jobState {
     grid-area: state;
     align-self: center;
   }

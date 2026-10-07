@@ -16,13 +16,13 @@
   &[data-state] {
     --box-color-standard: var(--state-color);
 
-    .box-title {
+    .boxTitle {
       background: var(--state-color);
       color: var(--state-contrast);
     }
   }
 
-  .box-title {
+  .boxTitle {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -33,26 +33,16 @@
     border-radius: var(--radius) var(--radius) 0 0;
     font-size: 14px;
 
-    .title-label {
+    .titleLabel {
       font-family: var(--font-headerf);
       font-size: 16px;
       letter-spacing: 0.5px;
       margin-right: auto;
     }
-
-    .btn {
-      background: transparent;
-      color: inherit;
-      border: 2px solid currentColor;
-      box-shadow: none;
-
-      &:hover {
-        background: color-mix(in srgb, currentColor 20%, transparent);
-      }
-    }
   }
+}
 
-  .box-body {
-    padding-top: 10px;
-  }
+/* Consumers can tighten the body padding via --box-body-pad. */
+.boxBody {
+  padding-top: var(--box-body-pad, 10px);
 }

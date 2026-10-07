@@ -1,10 +1,11 @@
+import misc from '../styles/misc.module.css';
 import { Icon } from './Icon';
 
 function Stat({ value, label, state }) {
   return (
-    <span className="stat" data-state={state}>
-      <span className="stat-value">{Number(value).toLocaleString()}</span>
-      <span className="stat-label">{label}</span>
+    <span className={misc.stat} data-state={state}>
+      <span className={misc.statValue}>{Number(value).toLocaleString()}</span>
+      <span className={misc.statLabel}>{label}</span>
     </span>
   );
 }
@@ -38,7 +39,7 @@ export function JobSummary({
   if (!hasResults && !cancelled && liveFailures === 0) return null;
 
   return (
-    <div className="job-summary">
+    <div className={misc.jobSummary}>
       {hasResults && totalBuilds > 0 && <Stat value={totalBuilds} label="builds" />}
       {hasResults && totalTests > 0 && <Stat value={totalTests} label="tests" />}
       {publishedBuildFail > 0 && (
@@ -51,7 +52,7 @@ export function JobSummary({
         <Stat value={liveFailures} label="failures before stop" state="errored" />
       )}
       {cancelled && (
-        <span className="job-note muted">
+        <span className={`${misc.jobNote} muted`}>
           <Icon name="info" />
           {job.state === 'stopped'
             ? 'Cancelled before detailed results were published.'

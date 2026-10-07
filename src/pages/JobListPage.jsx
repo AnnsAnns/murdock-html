@@ -20,6 +20,7 @@ import { useToast } from '../components/Toast';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useMurdockSocket } from '../hooks/useMurdockSocket';
 import { estimateQueuedStarts, jobContext } from '../utils/job';
+import dashboard from '../components/JobListPage.module.css';
 import { withViewTransition } from '../utils/viewTransition';
 import { FINISHED_STATES } from '../utils/state';
 
@@ -164,7 +165,7 @@ export function JobListPage() {
   const hasMore = jobs.length >= Number(params.limit);
 
   return (
-    <div className="dashboard">
+    <div className={dashboard.dashboard}>
       {loaded && <ActiveTimeBar jobs={jobs} refreshing={refreshing} />}
 
       <JobFilters

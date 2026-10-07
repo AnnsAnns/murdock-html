@@ -1,0 +1,24 @@
+/* ============================================================
+   Auth
+   ============================================================ */
+.avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius);
+  display: block;
+}
+
+.userButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px;
+  border: none;
+  border-radius: var(--radius);
+  background: transparent;
+  cursor: pointer;
+
+  &:hover {
+    background: color-mix(in srgb, var(--box-color-standard) 35%, transparent);
+  }
+}

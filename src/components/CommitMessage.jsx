@@ -1,4 +1,6 @@
 import { GITHUB_REPO } from '../api/config';
+import misc from '../styles/misc.module.css';
+import jobDetail from './JobInfo.module.css';
 import { Icon } from './Icon';
 
 function linkify(text, keyPrefix) {
@@ -34,11 +36,11 @@ export function CommitMessage({ message }) {
     <>
       <span>{linkify(first, 'first')}</span>
       {rest.length > 0 && (
-        <details className="commit-extra-details">
+        <details className={misc.commitExtraDetails}>
           <summary title="Show full commit message">
             <Icon name="expand" />
           </summary>
-          <div className="commit-extra">
+          <div className={jobDetail.commitExtra}>
             {rest.map((line, index) => (
               <div key={index}>{linkify(line, `line-${index}`)}</div>
             ))}

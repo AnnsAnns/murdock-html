@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useMemo, useRef, useState } from 'react';
+import styles from './Toast.module.css';
 import { Icon } from './Icon';
 
 const ToastContext = createContext(null);
@@ -18,13 +19,18 @@ export function ToastProvider({ children }) {
   return (
     <ToastContext.Provider value={value}>
       {children}
-      <div className="toasts" role="status" aria-live="polite">
+      <div className={styles.toasts} role="status" aria-live="polite">
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className={`toast ${toast.variant === 'danger' ? 'is-danger' : 'is-info'}`}
+            className={`${styles.toast} ${
+              toast.variant === 'danger' ? styles.isDanger : styles.isInfo
+            }`}
           >
-            <Icon name={toast.variant === 'danger' ? 'cross' : 'info'} className="toast-icon" />
+            <Icon
+              name={toast.variant === 'danger' ? 'cross' : 'info'}
+              className={styles.toastIcon}
+            />
             <span>{toast.message}</span>
           </div>
         ))}

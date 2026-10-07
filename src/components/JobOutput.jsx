@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { fetchText } from '../api/murdock';
+import controls from '../styles/controls.module.css';
+import outputStyles from './JobOutput.module.css';
 import { Icon } from './Icon';
 
 /** Scrollable log viewer with jump-to-top/bottom controls. */
@@ -43,20 +45,25 @@ export function JobOutput({ job, output }) {
   if (text === null) return null;
 
   return (
-    <div className="output">
-      <div className="output-scroll" ref={scrollRef} onScroll={measure}>
+    <div className={outputStyles.output}>
+      <div className={outputStyles.outputScroll} ref={scrollRef} onScroll={measure}>
         <pre>{text || 'No output available.'}</pre>
       </div>
-      <div className="output-actions">
+      <div className={outputStyles.outputActions}>
         {!atTop && (
-          <button type="button" className="icon-btn" title="Go to top" onClick={() => scrollTo(0)}>
+          <button
+            type="button"
+            className={`${controls.iconBtn} ${outputStyles.outputActionBtn}`}
+            title="Go to top"
+            onClick={() => scrollTo(0)}
+          >
             <Icon name="arrowUp" />
           </button>
         )}
         {!atBottom && (
           <button
             type="button"
-            className="icon-btn"
+            className={`${controls.iconBtn} ${outputStyles.outputActionBtn}`}
             title="Go to bottom"
             onClick={() => scrollTo(scrollRef.current?.scrollHeight ?? 0)}
           >

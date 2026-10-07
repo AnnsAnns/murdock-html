@@ -25,13 +25,13 @@
       background: color-mix(in srgb, var(--box-color-standard) 22%, transparent);
     }
 
-    &.is-active {
+    &.isActive {
       background: var(--box-color-standard);
       color: var(--on-accent);
     }
   }
 }
 
-.tab-panel {
+.tabPanel {
   padding-top: 4px;
 }

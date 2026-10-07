@@ -4,7 +4,7 @@
 .output {
   position: relative;
 
-  .output-scroll {
+  .outputScroll {
     background: var(--terminal-background);
     color: var(--terminal-text);
     padding: 12px;
@@ -21,7 +21,7 @@
     }
   }
 
-  .output-actions {
+  .outputActions {
     position: absolute;
     right: 8px;
     bottom: 8px;
@@ -29,7 +29,8 @@
     flex-direction: column;
     gap: 6px;
 
-    .icon-btn {
+    /* Applied to the icon buttons inside .outputActions. */
+    .outputActionBtn {
       background: var(--overlay-faint);
       color: var(--on-accent);
 

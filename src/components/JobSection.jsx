@@ -1,3 +1,5 @@
+import box from '../styles/box.module.css';
+import dashboard from './JobListPage.module.css';
 import { Icon } from './Icon';
 
 /**
@@ -7,14 +9,14 @@ import { Icon } from './Icon';
  */
 export function JobSection({ title, icon, state, count, action, children }) {
   return (
-    <section className="box job-section" data-state={state}>
-      <div className="box-title">
+    <section className={`${box.box} ${dashboard.jobSection}`} data-state={state}>
+      <div className={box.boxTitle}>
         {icon && <Icon name={icon} size={14} />}
-        <span className="title-label">{title}</span>
-        {count != null && <span className="section-count">{count}</span>}
+        <span className={box.titleLabel}>{title}</span>
+        {count != null && <span className={dashboard.sectionCount}>{count}</span>}
         {action}
       </div>
-      <div className="box-body">{children}</div>
+      <div className={`${box.boxBody} ${dashboard.sectionBody}`}>{children}</div>
     </section>
   );
 }

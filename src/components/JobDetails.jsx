@@ -1,12 +1,15 @@
+import card from '../styles/card.module.css';
+import results from '../styles/results.module.css';
+
 export function JobDetails({ job }) {
   const env = Object.entries(job.env ?? {}).sort(([a], [b]) => a.localeCompare(b));
 
   return (
-    <div className="card-grid">
-      <div className="card">
-        <div className="card-header">Context</div>
-        <div className="card-body">
-          <table className="table">
+    <div className={card.cardGrid}>
+      <div className={card.card}>
+        <div className={card.cardHeader}>Context</div>
+        <div className={card.cardBody}>
+          <table className={results.table}>
             <tbody>
               {'triggered_by' in job && (
                 <tr>
@@ -27,11 +30,11 @@ export function JobDetails({ job }) {
         </div>
       </div>
 
-      <div className="card">
-        <div className="card-header">Environment</div>
-        <div className="card-body">
+      <div className={card.card}>
+        <div className={card.cardHeader}>Environment</div>
+        <div className={card.cardBody}>
           {env.length ? (
-            <table className="table">
+            <table className={results.table}>
               <tbody>
                 {env.map(([key, value]) => (
                   <tr key={key}>

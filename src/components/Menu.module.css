@@ -6,7 +6,7 @@
   display: inline-block;
 }
 
-.menu-trigger {
+.menuTrigger {
   padding: 0;
   border: none;
   background: transparent;
@@ -15,7 +15,7 @@
   border-radius: var(--radius);
 }
 
-.menu-items {
+.menuItems {
   position: absolute;
   right: 0;
   top: calc(100% + 4px);
@@ -31,7 +31,7 @@
     0 0 0 3px var(--box-color-standard),
     4px 4px 0 0 color-mix(in srgb, var(--box-color-standard) 50%, transparent);
 
-  .menu-item {
+  .menuItem {
     display: flex;
     align-items: center;
     gap: 8px;

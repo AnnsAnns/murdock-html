@@ -4,6 +4,9 @@ import { getApplicationResults } from '../api/murdock';
 import { Icon } from '../components/Icon';
 import { Result } from '../components/Result';
 import { Spinner } from '../components/Spinner';
+import card from '../styles/card.module.css';
+import controls from '../styles/controls.module.css';
+import results from '../styles/results.module.css';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 
 export function ApplicationResultsPage({ type }) {
@@ -43,7 +46,11 @@ export function ApplicationResultsPage({ type }) {
 
   return (
     <>
-      <button type="button" className="btn btn--ghost" onClick={() => navigate(-1)}>
+      <button
+        type="button"
+        className={`${controls.btn} ${controls.btnGhost}`}
+        onClick={() => navigate(-1)}
+      >
         <Icon name="chevronLeft" />
         <span>Back to job {type}</span>
       </button>
@@ -52,14 +59,14 @@ export function ApplicationResultsPage({ type }) {
         <Spinner />
       ) : (
         <>
-          <div className="card">
-            <div className="card-header">
+          <div className={card.card}>
+            <div className={card.cardHeader}>
               {typeLabel}: {appPath}
             </div>
             {runtimeStats && (
-              <div className="card-body">
-                <div className="table-wrap">
-                  <table className="table">
+              <div className={card.cardBody}>
+                <div className={results.tableWrap}>
+                  <table className={results.table}>
                     <thead>
                       <tr>
                         <th>Average (s)</th>
@@ -83,20 +90,20 @@ export function ApplicationResultsPage({ type }) {
           </div>
 
           {failures.length > 0 && (
-            <div className="card is-danger">
-              <div className="card-header is-danger">
+            <div className={`${card.card} ${card.isDanger}`}>
+              <div className={`${card.cardHeader} ${card.isDanger}`}>
                 <span>
                   Failed {type} ({filteredFailures.length}/{jobs.length})
                 </span>
                 <input
-                  className="input"
+                  className={controls.input}
                   type="text"
                   placeholder={`Filter failed ${type}`}
                   value={failuresFilter}
                   onChange={(event) => setFailuresFilter(event.target.value)}
                 />
               </div>
-              <div className="card-body">
+              <div className={card.cardBody}>
                 {filteredFailures.map((result) => (
                   <Result
                     key={`${result.application}-${result.target}-${result.toolchain}`}
@@ -109,20 +116,20 @@ export function ApplicationResultsPage({ type }) {
             </div>
           )}
 
-          <div className="card">
-            <div className="card-header">
+          <div className={card.card}>
+            <div className={card.cardHeader}>
               <span>
                 {typeLabel} ({filteredJobs.length})
               </span>
               <input
-                className="input"
+                className={controls.input}
                 type="text"
                 placeholder={`Filter ${type}`}
                 value={filter}
                 onChange={(event) => setFilter(event.target.value)}
               />
             </div>
-            <div className="card-body">
+            <div className={card.cardBody}>
               {filteredJobs.map((result) => (
                 <Result
                   key={`${result.application}-${result.target}-${result.toolchain}`}

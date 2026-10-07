@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import styles from './ActiveTimeBar.module.css';
 import { preciseDuration } from '../utils/format';
 import { activeTimeTimeline } from '../utils/job';
 import { stateLabel } from '../utils/state';
@@ -26,20 +27,20 @@ export function ActiveTimeBar({ jobs, now, refreshing = false }) {
   const label = (seg) => `${stateLabel(seg.state)} · ${preciseDuration(seg.seconds)}`;
 
   return (
-    <div className="active-time">
-      <div className="active-time-head">
-        <span className="active-time-title">Active time</span>
-        <span className="active-time-total">{preciseDuration(active)}</span>
-        {idle > 0 && <span className="active-time-idle">{preciseDuration(idle)} idle</span>}
+    <div className={styles.activeTime}>
+      <div className={styles.activeTimeHead}>
+        <span className={styles.activeTimeTitle}>Active time</span>
+        <span className={styles.activeTimeTotal}>{preciseDuration(active)}</span>
+        {idle > 0 && <span>{preciseDuration(idle)} idle</span>}
         {utilization != null && (
-          <span className="active-time-util">{utilization}% utilized</span>
+          <span className={styles.activeTimeUtil}>{utilization}% utilized</span>
         )}
         {future > 0 && (
-          <span className="active-time-future">+{preciseDuration(future)} expected</span>
+          <span className={styles.activeTimeFuture}>+{preciseDuration(future)} expected</span>
         )}
         {refreshing && <span className="spinner" role="status" aria-label="Updating" />}
       </div>
-      <div className="active-time-bar">
+      <div className={styles.activeTimeBar}>
         {segments.map((seg) => {
           const style = { flexGrow: seg.seconds };
           const key = `${seg.uid ?? 'idle'}-${seg.start}`;
@@ -48,7 +49,7 @@ export function ActiveTimeBar({ jobs, now, refreshing = false }) {
             return (
               <span
                 key={key}
-                className="active-time-seg is-idle"
+                className={`${styles.activeTimeSeg} ${styles.isIdle}`}
                 style={style}
                 title={`Idle · ${preciseDuration(seg.seconds)}`}
               />
@@ -58,7 +59,7 @@ export function ActiveTimeBar({ jobs, now, refreshing = false }) {
           return (
             <Link
               key={key}
-              className={`active-time-seg${seg.future ? ' is-future' : ''}`}
+              className={`${styles.activeTimeSeg}${seg.future ? ` ${styles.isFuture}` : ''}`}
               data-state={seg.state}
               style={style}
               to={`/details/${seg.uid}`}

@@ -1,27 +1,21 @@
 /* ============================================================
    Filter panel
    ============================================================ */
-.filter-panel {
-  .box-body {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .filter-bar {
+.filterPanel {
+  .filterBar {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 10px;
   }
 
-  .filter-group {
+  .filterGroup {
     display: inline-flex;
     align-items: center;
     gap: 8px;
   }
 
-  .filter-label {
+  .filterLabel {
     font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -29,16 +23,23 @@
     white-space: nowrap;
   }
 
-  .input {
-    min-width: 150px;
-  }
-
-  .filter-search {
+  .filterSearch {
     margin-left: auto;
   }
 }
 
-.toolbar-group {
+/* Applied to the panel's .boxBody and to its inputs. */
+.filterBody {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.filterInput {
+  min-width: 150px;
+}
+
+.toolbarGroup {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -64,7 +65,7 @@
       background: color-mix(in srgb, var(--box-color-standard) 25%, transparent);
     }
 
-    &.is-on {
+    &.isOn {
       background: var(--box-color-standard);
       color: var(--on-accent);
     }
@@ -95,7 +96,7 @@
     box-shadow: 1px 1px 0 0 color-mix(in srgb, var(--state-color, var(--box-color-standard)) 45%, transparent);
   }
 
-  &.is-on {
+  &.isOn {
     background: var(--state-color);
     color: var(--state-contrast, var(--on-accent));
 
