@@ -62,9 +62,20 @@ describe('JobListPage', () => {
   it('renders the fetched jobs', async () => {
     renderPage();
     expect(await screen.findByText(/core: fix the thing/)).toBeInTheDocument();
-    expect(screen.getByText('Success')).toBeInTheDocument();
+    // "Success" appears on the row's state badge and on the state filter toggle.
+    expect(screen.getAllByText('Success').length).toBeGreaterThan(0);
     // 42s appears in both the row duration and the active-time bar.
     expect(screen.getAllByText('42s').length).toBeGreaterThan(0);
+  });
+
+  it('keeps the filters in a sidebar next to the jobs', async () => {
+    renderPage();
+
+    const sidebar = await screen.findByRole('complementary');
+    expect(sidebar).toContainElement(screen.getByText('Filters'));
+
+    // The job stream sits beside the filters, not inside them.
+    expect(sidebar).not.toContainElement(await screen.findByText('Current Job'));
   });
 
   it('groups jobs into Current, Queued and Past sections', async () => {

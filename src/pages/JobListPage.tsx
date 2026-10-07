@@ -177,84 +177,88 @@ export function JobListPage() {
 
   return (
     <div className={dashboard.dashboard}>
-      {loaded && <ActiveTimeBar jobs={jobs} refreshing={refreshing} />}
+      <aside className={dashboard.sidebar}>
+        <JobFilters
+          params={params}
+          draft={draft}
+          onType={onType}
+          onToggleState={onToggleState}
+          onTogglePrState={onTogglePrState}
+          onDraftChange={onDraftChange}
+          onCommit={onCommit}
+        />
+      </aside>
 
-      <JobFilters
-        params={params}
-        draft={draft}
-        onType={onType}
-        onToggleState={onToggleState}
-        onTogglePrState={onTogglePrState}
-        onDraftChange={onDraftChange}
-        onCommit={onCommit}
-      />
+      <div className={dashboard.content}>
+        {loaded && <ActiveTimeBar jobs={jobs} refreshing={refreshing} />}
 
-      {!loaded ? (
-        <Spinner />
-      ) : jobs.length ? (
-        <>
-          <JobSection
-            title="Current Job"
-            icon="gear"
-            state={running?.state}
-            action={
-              running && (
-                <JobActions
-                  job={running}
-                  canManage={canManage}
-                  onAction={(action) => onAction(running, action)}
-                />
-              )
-            }
-          >
-            {running ? (
-              <CurrentJob job={running} />
-            ) : (
-              <p className="muted">No job is running right now.</p>
-            )}
-          </JobSection>
+        {!loaded ? (
+          <Spinner />
+        ) : jobs.length ? (
+          <>
+            <JobSection
+              title="Current Job"
+              icon="gear"
+              state={running?.state}
+              action={
+                running && (
+                  <JobActions
+                    job={running}
+                    canManage={canManage}
+                    onAction={(action) => onAction(running, action)}
+                  />
+                )
+              }
+            >
+              {running ? (
+                <CurrentJob job={running} />
+              ) : (
+                <p className="muted">No job is running right now.</p>
+              )}
+            </JobSection>
 
-          <JobSection
-            title="Queued Jobs"
-            icon="inbox"
-            state={queued.length ? 'queued' : undefined}
-            count={queued.length}
-          >
-            {queued.length ? (
-              <JobList
-                jobs={queued}
-                canManage={canManage}
-                onAction={onAction}
-                queuedStarts={queuedStarts}
-                expandedUid={expandedUid}
-                onToggleExpand={toggleExpand}
-              />
-            ) : (
-              <p className="muted">The queue is empty.</p>
-            )}
-          </JobSection>
-
-          <JobSection title="Past Jobs" icon="clock" count={past.length}>
-            {past.length ? (
-              <>
+            <JobSection
+              title="Queued Jobs"
+              icon="inbox"
+              state={queued.length ? 'queued' : undefined}
+              count={queued.length}
+            >
+              {queued.length ? (
                 <JobList
-                  jobs={past}
+                  jobs={queued}
                   canManage={canManage}
                   onAction={onAction}
                   queuedStarts={queuedStarts}
                   expandedUid={expandedUid}
                   onToggleExpand={toggleExpand}
                 />
-                {hasMore && <ShowMore onClick={showMore} />}
-              </>
-            ) : (
-              <p className="muted">No finished jobs match.</p>
-            )}
-          </JobSection>
-        </>
-      ) : (
-        <div className="empty-state">No job matching</div>
-      )}
+              ) : (
+                <p className="muted">The queue is empty.</p>
+              )}
+            </JobSection>
+
+            <JobSection title="Past Jobs" icon="clock" count={past.length}>
+              {past.length ? (
+                <>
+                  <JobList
+                    jobs={past}
+                    canManage={canManage}
+                    onAction={onAction}
+                    queuedStarts={queuedStarts}
+                    expandedUid={expandedUid}
+                    onToggleExpand={toggleExpand}
+                  />
+                  {hasMore && <ShowMore onClick={showMore} />}
+                </>
+              ) : (
+                <p className="muted">No finished jobs match.</p>
+              )}
+            </JobSection>
+          </>
+        ) : (
+          <div className="empty-state">No job matching</div>
+        )}
+      </div>
     </div>
   );
 }

@@ -76,6 +76,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 6px;
   min-width: 36px;
   min-height: 32px;
   padding: 4px 8px;
@@ -103,5 +104,58 @@
     &:hover {
       filter: brightness(1.08);
     }
+  }
+}
+
+/* In the wide-screen left gutter the panel is a narrow vertical column: the
+   type and state controls become full-width boxes that stack and grow down
+   the panel, and every input/button fills the available width. */
+@media (min-width: 1800px) {
+  .filterPanel {
+    .filterBar {
+      flex-direction: column;
+      flex-wrap: nowrap;
+      align-items: stretch;
+      gap: 14px;
+    }
+
+    .filterGroup {
+      display: flex;
+      flex-direction: column;
+      flex-wrap: nowrap;
+      align-items: stretch;
+      gap: 6px;
+    }
+
+    .filterSearch {
+      margin-left: 0;
+      width: 100%;
+    }
+  }
+
+  .filterInput {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .segmented {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .segmented button {
+    width: 100%;
+    text-align: left;
+  }
+
+  .toolbarGroup {
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-items: stretch;
+  }
+
+  .toggle {
+    width: 100%;
+    justify-content: flex-start;
   }
 }

@@ -1,10 +1,43 @@
 /* ============================================================
-   Dashboard sections (Current / Queued / Past)
+   Dashboard: job stream, with an optional filter rail in the gutter
    ============================================================ */
 .dashboard {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+
+/* The filter panel stacks above the jobs by default. */
+.sidebar {
+  min-width: 0;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* On wide screens the filter panel moves out of the flow and into the empty
+   left gutter beside the centered app, so the main column keeps its full
+   width. Below this width there is not enough room and it stays on top. */
+@media (min-width: 1800px) {
+  .sidebar {
+    position: fixed;
+    top: 76px;
+    /* Size the rail to the free gutter: the app is centered at max 1280px, so
+       its left edge sits at `50vw - 640px`. Sit the rail 16px before it. */
+    --rail-width: clamp(200px, calc(50vw - 640px - 32px), 340px);
+    width: var(--rail-width);
+    left: calc(50vw - 640px - 16px - var(--rail-width));
+    z-index: 30;
+    /* Room for the panel's ring + hard offset shadow so the scroll container
+       does not clip it. */
+    padding: 8px;
+    max-height: calc(100vh - 92px);
+    overflow-y: auto;
+  }
 }
 
 .jobSection {

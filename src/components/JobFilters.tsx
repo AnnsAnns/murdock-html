@@ -78,6 +78,7 @@ export function JobFilters({
                     onClick={() => onToggleState(state)}
                   >
                     <Icon name={stateIcon(state)} />
+                    <span>{stateLabel(state)}</span>
                   </button>
                 );
               })}
