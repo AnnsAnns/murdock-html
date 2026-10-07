@@ -61,13 +61,13 @@ export function preciseDuration(value: number): string {
 }
 
 /**
- * Compact "Day.Month, HH:mm" (24-hour) date, e.g. "6.10, 15:26".
+ * Compact "DD.MM., HH:mm" (24-hour) date, e.g. "06.10., 15:26".
  * Used for the start/end columns and the job header.
  */
 export function formatDayMonthTime(date: Date): string {
-  const day = date.getDate();
-  const month = date.getMonth() + 1;
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
   const hours = String(date.getHours()).padStart(2, '0');
   const minutes = String(date.getMinutes()).padStart(2, '0');
-  return `${day}.${month}, ${hours}:${minutes}`;
+  return `${day}.${month}., ${hours}:${minutes}`;
 }

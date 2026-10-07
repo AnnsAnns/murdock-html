@@ -22,13 +22,14 @@ describe('formatEta', () => {
 });
 
 describe('formatDayMonthTime', () => {
-  it('formats as Day.Month, HH:mm in 24-hour time', () => {
-    expect(formatDayMonthTime(new Date(2026, 9, 6, 15, 26))).toBe('6.10, 15:26');
-    expect(formatDayMonthTime(new Date(2026, 0, 1, 9, 5))).toBe('1.1, 09:05');
+  it('formats as DD.MM., HH:mm in 24-hour time', () => {
+    expect(formatDayMonthTime(new Date(2026, 9, 6, 15, 26))).toBe('06.10., 15:26');
+    expect(formatDayMonthTime(new Date(2026, 0, 1, 9, 5))).toBe('01.01., 09:05');
   });
 
-  it('pads the time to two digits', () => {
-    expect(formatDayMonthTime(new Date(2026, 11, 24, 0, 0))).toBe('24.12, 00:00');
+  it('pads the day, month and time to two digits', () => {
+    expect(formatDayMonthTime(new Date(2026, 11, 24, 0, 0))).toBe('24.12., 00:00');
+    expect(formatDayMonthTime(new Date(2026, 2, 4, 8, 7))).toBe('04.03., 08:07');
   });
 });
 
