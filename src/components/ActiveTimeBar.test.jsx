@@ -30,9 +30,9 @@ describe('ActiveTimeBar', () => {
 
     // 60s + 100s active, 40s idle gap, 180s expected -> 160/200 = 80%.
     expect(screen.getByText('02m 40s')).toBeInTheDocument();
-    expect(screen.getByText('40s idle')).toBeInTheDocument();
+    expect(screen.getByText((_, el) => el.textContent === '40s idle')).toBeInTheDocument();
     expect(screen.getByText('80% utilized')).toBeInTheDocument();
-    expect(screen.getByText('+03m 00s expected')).toBeInTheDocument();
+    expect(screen.getByText((_, el) => el.textContent === '+03m 00s expected')).toBeInTheDocument();
   });
 
   it('links each job segment to its detail page', () => {

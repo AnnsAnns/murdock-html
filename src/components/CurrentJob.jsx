@@ -43,7 +43,8 @@ export function CurrentJob({ job }) {
         {start && (
           <span className={jobDetail.jobInfoItem}>
             <Icon name="calendar" />
-            Started {formatDayMonthTime(start)}
+            Started{' '}
+            <span className={jobDetail.jobInfoValue}>{formatDayMonthTime(start)}</span>
           </span>
         )}
         {end && (
@@ -52,7 +53,8 @@ export function CurrentJob({ job }) {
             title={end.estimated ? 'Estimated end time' : undefined}
           >
             <Icon name="clock" />
-            {end.estimated ? `Ends ~${formatDayMonthTime(end.date)}` : `Ended ${formatDayMonthTime(end.date)}`}
+            {end.estimated ? 'Ends ~' : 'Ended '}
+            <span className={jobDetail.jobInfoValue}>{formatDayMonthTime(end.date)}</span>
           </span>
         )}
       </div>

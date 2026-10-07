@@ -40,9 +40,19 @@ export function JobProgress({ job, status }) {
           </div>
         </div>
       )}
-      <span className={jobDetail.jobInfoItem}>
-        <Icon name="chart" />
-        {`fail: ${progress.failed} pass: ${progress.passed} done: ${progress.done}/${progress.total}`}
+      <span className={`${jobDetail.jobInfoItem} ${progressStyles.progressStats}`}>
+        <span className={progressStyles.progressStat} title={`${progress.failed} failed`}>
+          <Icon name="cross" size={14} className={progressStyles.statFail} />
+          {progress.failed}
+        </span>
+        <span className={progressStyles.progressStat} title={`${progress.passed} passed`}>
+          <Icon name="check" size={14} className={progressStyles.statPass} />
+          {progress.passed}
+        </span>
+        <span className={progressStyles.progressStat} title={`${progress.done} of ${progress.total} done`}>
+          <Icon name="dash" size={14} className={progressStyles.statDone} />
+          {progress.done}/{progress.total}
+        </span>
       </span>
     </div>
   );

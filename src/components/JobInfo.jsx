@@ -52,7 +52,8 @@ export function JobInfo({ job }) {
         {start && (
           <span className={jobDetail.jobInfoItem} title={relativeTime(start)}>
             <Icon name="calendar" />
-            {job.state === 'queued' ? 'Queued' : 'Started'} {formatDayMonthTime(start)}
+            {job.state === 'queued' ? 'Queued' : 'Started'}{' '}
+            <span className={jobDetail.jobInfoValue}>{formatDayMonthTime(start)}</span>
           </span>
         )}
         {end && (
@@ -62,13 +63,13 @@ export function JobInfo({ job }) {
           >
             <Icon name="calendar" />
             {end.estimated ? 'Ends ~' : 'Ended '}
-            {formatDayMonthTime(end.date)}
+            <span className={jobDetail.jobInfoValue}>{formatDayMonthTime(end.date)}</span>
           </span>
         )}
         {duration && (
           <span className={jobDetail.jobInfoItem}>
             <Icon name="clock" />
-            {duration}
+            <span className={jobDetail.jobInfoValue}>{duration}</span>
           </span>
         )}
       </div>

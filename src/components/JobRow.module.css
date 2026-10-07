@@ -132,10 +132,13 @@
 .jobEnd {
   font-size: 13px;
   opacity: 0.85;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .jobDuration {
   font-size: 13px;
+  font-variant-numeric: tabular-nums;
 }
 
 /* Applied to the progress bar inside the duration cell. */

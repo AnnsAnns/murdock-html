@@ -31,12 +31,18 @@ export function ActiveTimeBar({ jobs, now, refreshing = false }) {
       <div className={styles.activeTimeHead}>
         <span className={styles.activeTimeTitle}>Active time</span>
         <span className={styles.activeTimeTotal}>{preciseDuration(active)}</span>
-        {idle > 0 && <span>{preciseDuration(idle)} idle</span>}
+        {idle > 0 && (
+          <span className={styles.activeTimeIdle}>
+            <span className={styles.activeTimeValue}>{preciseDuration(idle)}</span> idle
+          </span>
+        )}
         {utilization != null && (
           <span className={styles.activeTimeUtil}>{utilization}% utilized</span>
         )}
         {future > 0 && (
-          <span className={styles.activeTimeFuture}>+{preciseDuration(future)} expected</span>
+          <span className={styles.activeTimeFuture}>
+            +<span className={styles.activeTimeValue}>{preciseDuration(future)}</span> expected
+          </span>
         )}
         {refreshing && <span className="spinner" role="status" aria-label="Updating" />}
       </div>

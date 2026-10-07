@@ -19,12 +19,21 @@
   display: flex;
   flex-wrap: wrap;
   gap: 10px 28px;
+  font-variant-numeric: tabular-nums;
 
   .jobInfoItem {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     font-size: 14px;
+  }
+
+  /* Time values keep a reserved width so a changing minute/day does not
+     reflow the items around them. */
+  .jobInfoValue {
+    display: inline-block;
+    min-width: 12ch;
+    white-space: nowrap;
   }
 }
 

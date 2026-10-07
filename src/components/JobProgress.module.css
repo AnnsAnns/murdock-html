@@ -55,6 +55,35 @@
   }
 }
 
+/* Live fail / pass / done counters. Tabular digits keep the numbers from
+   changing width as they tick, so the row and progress bar stay put. */
+.progressStats {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.progressStat {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.statFail {
+  color: var(--state-errored);
+}
+
+.statPass {
+  color: var(--state-passed);
+}
+
+.statDone {
+  opacity: 0.6;
+}
+
 .flicker {
   animation: flicker 1s infinite;
 }
