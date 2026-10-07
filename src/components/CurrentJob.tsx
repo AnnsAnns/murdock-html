@@ -2,7 +2,7 @@ import { GITHUB_REPO } from '../api/config';
 import dashboard from './JobListPage.module.css';
 import jobDetail from './JobInfo.module.css';
 import controls from '../styles/controls.module.css';
-import { formatDayMonthTime } from '../utils/format';
+import { formatDayMonthTime, formatEta, preciseDuration } from '../utils/format';
 import { jobEnd, jobRefLink, jobStartDate, jobTitle } from '../utils/job';
 import { Icon } from './Icon';
 import { JobActions } from './JobActions';
@@ -19,13 +19,20 @@ export interface CurrentJobProps {
 
 /**
  * The running job, shown prominently in the "Current Job" section: what it is,
- * where it came from, when it started/ends and the live build progress. Its
- * "..." menu expands the inline detail, opens the full page or aborts it.
+ * where it came from, when it started/ends, the live ETA and the build
+ * progress. Clicking the title expands the inline detail; the "..." menu opens
+ * the full page or aborts it.
  */
 export function CurrentJob({ job, canManage, onAction, expanded, onToggle }: CurrentJobProps) {
   const refLink = jobRefLink(job, GITHUB_REPO);
   const start = jobStartDate(job);
   const end = jobEnd(job);
+  const status = job.status;
+
+  // Live ETA while running, else the final runtime (same as the inline detail).
+  let duration: string | null = null;
+  if (job.state === 'running' && status?.eta != null) duration = formatEta(status.eta);
+  else if (job.state !== 'running' && job.runtime !== undefined) duration = preciseDuration(job.runtime);
 
   return (
     <div className={dashboard.currentJob}>
@@ -87,6 +94,12 @@ export function CurrentJob({ job, canManage, onAction, expanded, onToggle }: Cur
             <Icon name="clock" />
             {end.estimated ? 'Ends ~' : 'Ended '}
             <span className={jobDetail.jobInfoValue}>{formatDayMonthTime(end.date)}</span>
+          </span>
+        )}
+        {duration && (
+          <span className={jobDetail.jobInfoItem}>
+            <Icon name="clock" />
+            <span className={jobDetail.jobInfoValue}>{duration}</span>
           </span>
         )}
       </div>
