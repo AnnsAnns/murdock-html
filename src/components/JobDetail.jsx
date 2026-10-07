@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { deleteJob, getJob, getResultFile, restartJob } from '../api/murdock';
 import { useAuth } from '../auth/AuthContext';
@@ -17,6 +17,7 @@ import { Spinner } from './Spinner';
 import { useToast } from './Toast';
 import { useMurdockSocket } from '../hooks/useMurdockSocket';
 import { jobContext } from '../utils/job';
+import { withViewTransition } from '../utils/viewTransition';
 
 const RESULT_TABS = ['builds', 'tests', 'output', 'artifacts', 'details', 'stats'];
 
@@ -79,27 +80,39 @@ export function JobDetail({ path, activeTab: controlledTab, tabHref, onSelectTab
   const [refreshToken, setRefreshToken] = useState(0);
   const [busy, setBusy] = useState(false);
   const [internalTab, setInternalTab] = useState(null);
+  const previousPath = useRef(path);
 
+  // A background `reload` keeps the current job on screen and swaps it in when
+  // the refetch resolves; only navigating to a different job resets to loading.
   useEffect(() => {
     const controller = new AbortController();
-    setFetched(false);
-    setBuilds(null);
-    setBuildFailures(null);
-    setTests(null);
-    setTestFailures(null);
-    setStats(null);
-    setResultsPublished(false);
+    const isNewPath = previousPath.current !== path;
+    previousPath.current = path;
+
+    if (isNewPath) {
+      setFetched(false);
+      setBuilds(null);
+      setBuildFailures(null);
+      setTests(null);
+      setTestFailures(null);
+      setStats(null);
+      setResultsPublished(false);
+    }
 
     getJob(path, controller.signal)
       .then((data) => {
-        setJob(data);
-        setOutput(data.output ?? null);
-        setFetched(true);
+        withViewTransition(() => {
+          setJob(data);
+          setOutput(data.output ?? null);
+          setFetched(true);
+        });
       })
       .catch((error) => {
         if (error.name === 'AbortError') return;
-        setJob(null);
-        setOutput(null);
+        if (isNewPath) {
+          setJob(null);
+          setOutput(null);
+        }
         setFetched(true);
       });
 

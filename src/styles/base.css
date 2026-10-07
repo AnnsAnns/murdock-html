@@ -261,3 +261,29 @@ textarea {
   padding: 48px 16px;
   font-size: 18px;
 }
+
+/* ---- view transitions ---- */
+/* Cross-document navigations get the browser default (progressive enhancement). */
+@view-transition {
+  navigation: auto;
+}
+
+/* The topbar persists across same-document updates, so keep it out of the
+   cross-fade and pin it in place. */
+.topbar {
+  view-transition-name: topbar;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 200ms;
+  animation-timing-function: ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}

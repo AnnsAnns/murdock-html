@@ -10,7 +10,7 @@ import { stateLabel } from '../utils/state';
  * (nothing running) are filled with a neutral hatch, and every job segment
  * links to that job's detail page.
  */
-export function ActiveTimeBar({ jobs, now }) {
+export function ActiveTimeBar({ jobs, now, refreshing = false }) {
   const segments = activeTimeTimeline(jobs, now);
   if (!segments.length) return null;
 
@@ -37,6 +37,7 @@ export function ActiveTimeBar({ jobs, now }) {
         {future > 0 && (
           <span className="active-time-future">+{preciseDuration(future)} expected</span>
         )}
+        {refreshing && <span className="spinner" role="status" aria-label="Updating" />}
       </div>
       <div className="active-time-bar">
         {segments.map((seg) => {

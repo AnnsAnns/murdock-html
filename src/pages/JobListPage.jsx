@@ -20,6 +20,7 @@ import { useToast } from '../components/Toast';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useMurdockSocket } from '../hooks/useMurdockSocket';
 import { estimateQueuedStarts, jobContext } from '../utils/job';
+import { withViewTransition } from '../utils/viewTransition';
 import { FINISHED_STATES } from '../utils/state';
 
 // How many running/queued jobs to look at when estimating queued start times.
@@ -32,6 +33,7 @@ export function JobListPage() {
 
   const [jobs, setJobs] = useState([]);
   const [loaded, setLoaded] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [refreshToken, setRefreshToken] = useState(0);
   const [queue, setQueue] = useState([]);
   const [expandedUid, setExpandedUid] = useState(null);
@@ -59,34 +61,38 @@ export function JobListPage() {
     });
   }, [params.sha, params.author, params.prnum, params.branch, params.tag]);
 
+  // Fetch the (filtered) job list and the global running/queued queue together
+  // so a refresh swaps both in one animated commit. Crucially the previous data
+  // stays on screen while a background reload is in flight — only the very first
+  // load shows the spinner, so socket updates no longer blank the dashboard.
   useEffect(() => {
     const controller = new AbortController();
-    setLoaded(false);
-    getJobs(apiQuery, controller.signal)
-      .then((data) => {
-        setJobs(data);
-        setLoaded(true);
+    setRefreshing(true);
+
+    const queueQuery = `limit=${QUEUE_LOOKAHEAD}&states=running+queued`;
+    const jobsRequest = getJobs(apiQuery, controller.signal);
+    const queueRequest = getJobs(queueQuery, controller.signal).catch(() => null);
+
+    Promise.all([jobsRequest, queueRequest])
+      .then(([jobList, queueList]) => {
+        withViewTransition(() => {
+          setJobs(jobList);
+          if (queueList) setQueue(queueList);
+          setLoaded(true);
+          setRefreshing(false);
+        });
       })
       .catch((error) => {
         if (error.name === 'AbortError') return;
-        setJobs([]);
-        setLoaded(true);
+        // Keep whatever is on screen rather than clearing the dashboard.
+        withViewTransition(() => {
+          setLoaded(true);
+          setRefreshing(false);
+        });
       });
+
     return () => controller.abort();
   }, [apiQuery, refreshToken]);
-
-  // Track the running and queued jobs to estimate when a queued job will start:
-  // each job ahead of it in the queue contributes its estimated runtime (a
-  // running job its live ETA, a queued one its runtime guessed from the CI
-  // flags). Fetched independently of the dashboard filters so it stays
-  // available when filtering by queued only.
-  useEffect(() => {
-    const controller = new AbortController();
-    getJobs(`limit=${QUEUE_LOOKAHEAD}&states=running+queued`, controller.signal)
-      .then(setQueue)
-      .catch(() => setQueue([]));
-    return () => controller.abort();
-  }, [refreshToken]);
 
   const queuedStarts = useMemo(() => estimateQueuedStarts(queue), [queue]);
 
@@ -127,7 +133,7 @@ export function JobListPage() {
   const onCommit = () => update(draft);
   const showMore = () => update({ limit: Number(params.limit) + ITEMS_DISPLAYED_STEP });
   const toggleExpand = useCallback(
-    (uid) => setExpandedUid((current) => (current === uid ? null : uid)),
+    (uid) => withViewTransition(() => setExpandedUid((current) => (current === uid ? null : uid))),
     [],
   );
 
@@ -159,7 +165,7 @@ export function JobListPage() {
 
   return (
     <div className="dashboard">
-      {loaded && <ActiveTimeBar jobs={jobs} />}
+      {loaded && <ActiveTimeBar jobs={jobs} refreshing={refreshing} />}
 
       <JobFilters
         params={params}
