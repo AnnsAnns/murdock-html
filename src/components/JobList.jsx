@@ -17,7 +17,7 @@ export function JobList({ jobs, canManage, onAction, queuedStarts }) {
             key={job.uid}
             job={job}
             canManage={canManage}
-            onAction={onAction}
+            onAction={(action) => onAction(job, action)}
             queuedStarts={queuedStarts}
           />
         ))}

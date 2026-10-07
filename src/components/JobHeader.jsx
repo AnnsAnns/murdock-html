@@ -1,7 +1,7 @@
 import { GITHUB_REPO } from '../api/config';
 import { jobTitleUrl, refRepr } from '../utils/job';
-import { FINISHED_STATES } from '../utils/state';
 import { Icon } from './Icon';
+import { JobActions } from './JobActions';
 import { StateBadge } from './StateBadge';
 
 export function JobHeader({ job, canManage, onAction, busy = false }) {
@@ -20,28 +20,7 @@ export function JobHeader({ job, canManage, onAction, busy = false }) {
         )}
       </span>
       <StateBadge state={job.state} />
-      {canManage && (
-        <>
-          {job.state === 'queued' && (
-            <button type="button" className="btn btn--sm" disabled={busy} onClick={() => onAction('cancel')}>
-              <Icon name="cross" />
-              <span>Cancel</span>
-            </button>
-          )}
-          {job.state === 'running' && (
-            <button type="button" className="btn btn--sm" disabled={busy} onClick={() => onAction('abort')}>
-              <Icon name="cross" />
-              <span>Abort</span>
-            </button>
-          )}
-          {FINISHED_STATES.includes(job.state) && (
-            <button type="button" className="btn btn--sm" disabled={busy} onClick={() => onAction('restart')}>
-              <Icon name="restart" />
-              <span>Restart</span>
-            </button>
-          )}
-        </>
-      )}
+      {canManage && <JobActions job={job} onAction={onAction} busy={busy} />}
     </div>
   );
 }

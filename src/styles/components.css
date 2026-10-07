@@ -66,7 +66,6 @@
   background: var(--base-background-color);
   border-radius: var(--radius);
   box-shadow: 0 0 0 3px var(--box-color-standard);
-  overflow: hidden;
 }
 
 .card {
@@ -368,6 +367,7 @@
   border: 2px solid var(--box-color-standard);
   border-radius: var(--radius);
   overflow: hidden;
+  box-shadow: 3px 3px 0 0 color-mix(in srgb, var(--box-color-standard) 45%, transparent);
 
   button {
     border: none;
@@ -401,6 +401,12 @@
   background: transparent;
   color: var(--state-color, inherit);
   cursor: pointer;
+  box-shadow: 2px 2px 0 0 color-mix(in srgb, var(--state-color, var(--box-color-standard)) 45%, transparent);
+
+  &:active {
+    translate: 1px 1px;
+    box-shadow: 1px 1px 0 0 color-mix(in srgb, var(--state-color, var(--box-color-standard)) 45%, transparent);
+  }
 
   &.is-on {
     background: var(--state-color);
@@ -420,7 +426,7 @@
 .job-list-head,
 .job-row {
   display: grid;
-  grid-template-columns: 84px minmax(0, 1fr) 115px 115px 150px 132px;
+  grid-template-columns: 84px minmax(0, 1fr) 115px 115px 150px 156px;
   gap: 12px;
   align-items: center;
   padding: 9px 12px;
@@ -440,6 +446,7 @@
 
   &:last-child {
     border-bottom: none;
+    border-radius: 0 0 var(--radius) var(--radius);
   }
 
   &:hover {
@@ -486,7 +493,25 @@
 
 .job-state {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
+  gap: 4px;
+
+  /* The maintainer actions sit behind a compact "..." menu next to the badge. */
+  .menu-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    min-height: 28px;
+    padding: 2px;
+    opacity: 0.75;
+
+    &:hover {
+      opacity: 1;
+      background: color-mix(in srgb, var(--box-color-standard) 25%, transparent);
+    }
+  }
 }
 
 @media (max-width: 860px) {

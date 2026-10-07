@@ -11,7 +11,7 @@ import {
 import { formatDayMonthTime, formatEta, preciseDuration, relativeTime } from '../utils/format';
 import { FINISHED_STATES } from '../utils/state';
 import { Icon } from './Icon';
-import { Menu } from './Menu';
+import { JobActions } from './JobActions';
 import { StateBadge } from './StateBadge';
 
 function DurationCell({ job }) {
@@ -67,31 +67,11 @@ function StateCell({ job, canManage, onAction }) {
     (job.status?.failed_builds?.length ?? 0) +
     (job.status?.failed_tests?.length ?? 0);
 
-  const badge = <StateBadge state={job.state} count={failed} />;
-
-  if (!canManage) return badge;
-
   return (
-    <Menu label="Job actions" trigger={badge}>
-      {job.state === 'queued' && (
-        <button type="button" className="menu-item" onClick={() => onAction('cancel')}>
-          <Icon name="cross" />
-          <span>Cancel</span>
-        </button>
-      )}
-      {job.state === 'running' && (
-        <button type="button" className="menu-item" onClick={() => onAction('abort')}>
-          <Icon name="cross" />
-          <span>Abort</span>
-        </button>
-      )}
-      {FINISHED_STATES.includes(job.state) && (
-        <button type="button" className="menu-item" onClick={() => onAction('restart')}>
-          <Icon name="restart" />
-          <span>Restart</span>
-        </button>
-      )}
-    </Menu>
+    <>
+      <StateBadge state={job.state} count={failed} />
+      {canManage && <JobActions job={job} onAction={onAction} variant="menu" />}
+    </>
   );
 }
 
