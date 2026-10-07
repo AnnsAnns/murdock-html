@@ -14,7 +14,7 @@ export function JobList({
   return (
     <>
       <div className="job-list-head" aria-hidden="true">
-        <span>Job</span>
+        <span>Ref</span>
         <span>Title</span>
         <span>Start Date</span>
         <span>End Date</span>

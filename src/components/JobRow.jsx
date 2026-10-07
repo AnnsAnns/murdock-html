@@ -90,10 +90,22 @@ export function JobRow({ job, canManage, onAction, queuedStarts, expanded = fals
       data-state={job.state}
       onClick={() => onToggle?.()}
     >
-      <div className="job-uid">
-        <span className="job-uid-text" title={job.uid}>
-          {job.uid.slice(0, 7)}
-        </span>
+      <div className="job-ref">
+        {refLink ? (
+          <a
+            className="ref-link"
+            href={refLink.url}
+            target="_blank"
+            rel="noreferrer noopener"
+            title={refLink.title}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <Icon name={refLink.icon} size={13} />
+            <span className="ref-link-label">{refLink.label}</span>
+          </a>
+        ) : (
+          <span className="muted">-</span>
+        )}
       </div>
 
       <div className="job-title">
@@ -110,19 +122,6 @@ export function JobRow({ job, canManage, onAction, queuedStarts, expanded = fals
           <Icon name="chevronDown" size={14} className={expanded ? 'is-open' : ''} />
         </button>
 
-        {refLink && (
-          <a
-            className="ref-link"
-            href={refLink.url}
-            target="_blank"
-            rel="noreferrer noopener"
-            title={refLink.title}
-            onClick={(event) => event.stopPropagation()}
-          >
-            <Icon name={refLink.icon} size={13} />
-            <span>{refLink.label}</span>
-          </a>
-        )}
         <span className="job-title-text" title={jobTooltip(job)}>
           {title}
         </span>

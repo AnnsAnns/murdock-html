@@ -468,7 +468,7 @@
 .job-list-head,
 .job-row {
   display: grid;
-  grid-template-columns: 84px minmax(0, 1fr) 115px 115px 150px 156px;
+  grid-template-columns: 132px minmax(0, 1fr) 115px 115px 150px 156px;
   gap: 12px;
   align-items: center;
   padding: 9px 12px;
@@ -503,9 +503,24 @@
   }
 }
 
-.job-uid-text {
-  font-family: var(--font-mono);
-  font-size: 13px;
+/* Ref badge (PR / merge queue / branch): same box size as the state badge. */
+.job-ref {
+  display: flex;
+  min-width: 0;
+
+  .ref-link {
+    width: 120px;
+    max-width: 100%;
+    justify-content: center;
+    padding: 4px 9px;
+    gap: 6px;
+  }
+
+  .ref-link-label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }
 
 /* Expand/collapse control; the whole row is also clickable. */
@@ -615,6 +630,7 @@
   .job-row {
     grid-template-columns: minmax(0, 1fr) auto;
     grid-template-areas:
+      "ref state"
       "title state"
       "start state"
       "end state";
@@ -622,9 +638,12 @@
     align-items: start;
   }
 
-  .job-uid,
   .job-duration {
     display: none;
+  }
+
+  .job-ref {
+    grid-area: ref;
   }
 
   .job-title {
