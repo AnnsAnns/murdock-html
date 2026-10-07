@@ -56,7 +56,7 @@ All settings are Vite env vars (prefix `VITE_`), read from `.env`:
 | `VITE_GITHUB_REDIRECT_URI` | OAuth redirect URI | `{origin}/` |
 | `VITE_GITHUB_SCOPE` | OAuth scopes requested | `read:user` |
 | `VITE_PRIVACY_URL` | Privacy policy link | riot-os.org |
-| `VITE_ITEMS_DISPLAYED_STEP` | Jobs fetched per page | `25` |
+| `VITE_ITEMS_DISPLAYED_STEP` | Jobs fetched per page | `50` |
 
 ### GitHub login
 

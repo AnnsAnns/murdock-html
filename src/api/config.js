@@ -23,6 +23,6 @@ export const GITHUB_SCOPE = env.VITE_GITHUB_SCOPE || 'read:user';
 
 export const PRIVACY_URL = env.VITE_PRIVACY_URL || 'https://www.riot-os.org/privacy-policy.html';
 
-export const ITEMS_DISPLAYED_STEP = Number.parseInt(env.VITE_ITEMS_DISPLAYED_STEP || '25', 10);
+export const ITEMS_DISPLAYED_STEP = Number.parseInt(env.VITE_ITEMS_DISPLAYED_STEP || '50', 10);
 
 export const AUTH_ENABLED = Boolean(GITHUB_CLIENT_ID);
