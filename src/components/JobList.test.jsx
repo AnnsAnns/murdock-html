@@ -28,14 +28,17 @@ describe('JobList', () => {
     const onAction = vi.fn();
     renderList({ canManage: true, onAction });
 
-    await userEvent.click(screen.getByRole('button', { name: 'Restart job' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Job actions' }));
     await userEvent.click(screen.getByRole('button', { name: 'Restart' }));
 
     expect(onAction).toHaveBeenCalledWith(job, 'restart');
   });
 
-  it('shows no action menu without manage rights', () => {
+  it('shows the menu but no maintainer action without manage rights', async () => {
     renderList({ canManage: false, onAction: () => {} });
-    expect(screen.queryByRole('button', { name: 'Restart job' })).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Job actions' }));
+    expect(screen.getByRole('link', { name: /Open full page/ })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Restart' })).not.toBeInTheDocument();
   });
 });

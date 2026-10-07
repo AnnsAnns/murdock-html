@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AuthProvider } from '../auth/AuthContext';
@@ -63,11 +64,66 @@ describe('JobListPage', () => {
     expect(screen.getByText('42s')).toBeInTheDocument();
   });
 
+  it('groups jobs into Current, Queued and Past sections', async () => {
+    const makeJob = (uid, state, message, extra = {}) => ({
+      ...job,
+      uid,
+      state,
+      commit: { ...job.commit, message },
+      ...extra,
+    });
+
+    const running = makeJob('run', 'running', 'running: the current one', {
+      start_time: 1700000010,
+      status: { eta: 30, total: 4, passed: 2, failed: 0 },
+    });
+    const queued = makeJob('queue', 'queued', 'queued: next in line', {
+      start_time: 0,
+      status: {},
+    });
+    const passed = makeJob('past', 'passed', 'past: already done');
+
+    fetch.mockImplementation((url) =>
+      String(url).includes('/jobs') ? jsonResponse([running, queued, passed]) : Promise.reject(),
+    );
+
+    renderPage();
+
+    expect(await screen.findByText('Current Job')).toBeInTheDocument();
+    expect(screen.getByText('Queued Jobs')).toBeInTheDocument();
+    expect(screen.getByText('Past Jobs')).toBeInTheDocument();
+    expect(screen.getByText(/running: the current one/)).toBeInTheDocument();
+    expect(screen.getByText(/queued: next in line/)).toBeInTheDocument();
+    expect(screen.getByText(/past: already done/)).toBeInTheDocument();
+  });
+
   it('shows the empty state when there are no jobs', async () => {
     fetch.mockImplementation((url) =>
       String(url).includes('/jobs') ? jsonResponse([]) : Promise.reject(new Error('unexpected')),
     );
     renderPage();
     expect(await screen.findByText('No job matching')).toBeInTheDocument();
+  });
+
+  it('fetches the detail only once a row is expanded', async () => {
+    const past = { ...job, uid: 'past123', state: 'passed' };
+    const calls = [];
+    fetch.mockImplementation((url) => {
+      const href = String(url);
+      calls.push(href);
+      if (href.includes('/jobs')) return jsonResponse([past]);
+      if (href.includes('/job/past123')) return jsonResponse(past);
+      if (href.includes('/results/')) return jsonResponse([]);
+      return jsonResponse({});
+    });
+
+    renderPage();
+    expect(await screen.findByText(/core: fix the thing/)).toBeInTheDocument();
+    expect(calls.some((href) => href.includes('/job/past123'))).toBe(false);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Expand job past123' }));
+
+    expect(await screen.findByRole('button', { name: 'Collapse job past123' })).toBeInTheDocument();
+    expect(calls.some((href) => href.includes('/job/past123'))).toBe(true);
   });
 });

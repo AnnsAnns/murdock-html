@@ -60,14 +60,56 @@
 }
 
 /* ============================================================
-   Panel + card
+   Dashboard sections (Current / Queued / Past)
    ============================================================ */
-.panel {
-  background: var(--base-background-color);
-  border-radius: var(--radius);
-  box-shadow: 0 0 0 3px var(--box-color-standard);
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
+.job-section {
+  .box-body {
+    padding-top: 6px;
+  }
+
+  /* Align the table with the title bar (the box already adds side padding). */
+  .job-list-head,
+  .job-row {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .section-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 7px;
+    border-radius: 999px;
+    background: color-mix(in srgb, currentColor 25%, transparent);
+    font-size: 12px;
+    font-weight: 600;
+  }
+}
+
+.current-job {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  .current-job-title {
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+  }
+}
+
+/* ============================================================
+   Card
+   ============================================================ */
 .card {
   background: var(--base-background-color);
   border-radius: var(--radius);
@@ -442,21 +484,72 @@
 
 .job-row {
   position: relative;
+  /* A faint wash in the job's own state colour so rows read at a glance. */
+  --row-tint: var(--state-color, var(--box-color-standard));
+  background: color-mix(in srgb, var(--row-tint) 6%, transparent);
   border-bottom: 1px solid var(--border);
+  cursor: pointer;
 
   &:last-child {
     border-bottom: none;
-    border-radius: 0 0 var(--radius) var(--radius);
   }
 
   &:hover {
-    background: color-mix(in srgb, var(--box-color-standard) 16%, transparent);
+    background: color-mix(in srgb, var(--row-tint) 14%, transparent);
+  }
+
+  &.is-expanded {
+    background: color-mix(in srgb, var(--row-tint) 18%, transparent);
   }
 }
 
-.job-uid a {
+.job-uid-text {
   font-family: var(--font-mono);
   font-size: 13px;
+}
+
+/* Expand/collapse control; the whole row is also clickable. */
+.job-expand {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius);
+  background: transparent;
+  color: inherit;
+  opacity: 0.6;
+  cursor: pointer;
+
+  svg {
+    transition: transform 0.15s ease;
+  }
+
+  &:hover {
+    opacity: 1;
+    background: color-mix(in srgb, var(--row-tint) 30%, transparent);
+  }
+
+  svg.is-open {
+    transform: rotate(180deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .job-expand svg {
+    transition: none;
+  }
+}
+
+/* Inline detail view that unfolds under a row (fetched only when opened). */
+.job-embed {
+  list-style: none;
+  padding: 10px 10px 12px;
+  background: color-mix(in srgb, var(--state-color, var(--box-color-standard)) 5%, transparent);
+  box-shadow: inset 0 3px 0 0 color-mix(in srgb, var(--state-color, var(--box-color-standard)) 55%, transparent);
 }
 
 .job-title {
@@ -606,6 +699,7 @@
     background: transparent;
     color: inherit;
     text-align: left;
+    text-decoration: none;
     cursor: pointer;
 
     &:hover {

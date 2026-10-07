@@ -1,4 +1,3 @@
-import { Link } from 'react-router-dom';
 import { GITHUB_REPO } from '../api/config';
 import {
   buildProgress,
@@ -20,9 +19,8 @@ function DurationCell({ job }) {
   if (job.state === 'running') {
     if (progress) {
       return (
-        <Link
+        <div
           className="job-duration"
-          to={`/details/${job.uid}`}
           title={`fail: ${progress.failed} pass: ${progress.passed} done: ${progress.done}/${progress.total}`}
         >
           <span className="row" style={{ gap: 4 }}>
@@ -39,26 +37,22 @@ function DurationCell({ job }) {
               style={{ width: `${progress.percent}%` }}
             />
           </div>
-        </Link>
+        </div>
       );
     }
     return (
-      <Link className="job-duration" to={`/details/${job.uid}`}>
+      <div className="job-duration">
         <span className="spinner" aria-hidden="true" />
         {job.status?.status ? <em>{job.status.status}…</em> : null}
-      </Link>
+      </div>
     );
   }
 
   if (FINISHED_STATES.includes(job.state)) {
-    return (
-      <Link className="job-duration" to={`/details/${job.uid}`}>
-        {preciseDuration(job.runtime ?? 0)}
-      </Link>
-    );
+    return <div className="job-duration">{preciseDuration(job.runtime ?? 0)}</div>;
   }
 
-  return <span className="job-duration muted">-</span>;
+  return <div className="job-duration muted">-</div>;
 }
 
 function StateCell({ job, canManage, onAction }) {
@@ -70,12 +64,12 @@ function StateCell({ job, canManage, onAction }) {
   return (
     <>
       <StateBadge state={job.state} count={failed} />
-      {canManage && <JobActions job={job} onAction={onAction} variant="menu" />}
+      <JobActions job={job} canManage={canManage} onAction={onAction} variant="menu" />
     </>
   );
 }
 
-export function JobRow({ job, canManage, onAction, queuedStarts }) {
+export function JobRow({ job, canManage, onAction, queuedStarts, expanded = false, onToggle }) {
   const start = jobStartDate(job);
   const end = jobEnd(job);
 
@@ -91,14 +85,31 @@ export function JobRow({ job, canManage, onAction, queuedStarts }) {
   const title = jobTitle(job);
 
   return (
-    <li className="job-row" data-state={job.state}>
+    <li
+      className={`job-row ${expanded ? 'is-expanded' : ''}`}
+      data-state={job.state}
+      onClick={() => onToggle?.()}
+    >
       <div className="job-uid">
-        <Link to={`/details/${job.uid}`} title={job.uid}>
+        <span className="job-uid-text" title={job.uid}>
           {job.uid.slice(0, 7)}
-        </Link>
+        </span>
       </div>
 
       <div className="job-title">
+        <button
+          type="button"
+          className="job-expand"
+          aria-expanded={expanded}
+          aria-label={`${expanded ? 'Collapse' : 'Expand'} job ${job.uid.slice(0, 7)}`}
+          onClick={(event) => {
+            event.stopPropagation();
+            onToggle?.();
+          }}
+        >
+          <Icon name="chevronDown" size={14} className={expanded ? 'is-open' : ''} />
+        </button>
+
         {refLink && (
           <a
             className="ref-link"
@@ -106,28 +117,24 @@ export function JobRow({ job, canManage, onAction, queuedStarts }) {
             target="_blank"
             rel="noreferrer noopener"
             title={refLink.title}
+            onClick={(event) => event.stopPropagation()}
           >
             <Icon name={refLink.icon} size={13} />
             <span>{refLink.label}</span>
           </a>
         )}
-        <Link className="job-title-text" to={`/details/${job.uid}`} title={jobTooltip(job)}>
+        <span className="job-title-text" title={jobTooltip(job)}>
           {title}
-        </Link>
+        </span>
       </div>
 
       <div className="job-start">
         {queuedStart ? (
-          <Link
-            to={`/details/${job.uid}`}
-            title="Estimated start, after the jobs ahead in the queue"
-          >
+          <span title="Estimated start, after the jobs ahead in the queue">
             ≥ {formatDayMonthTime(queuedStart)}
-          </Link>
+          </span>
         ) : start ? (
-          <Link to={`/details/${job.uid}`} title={relativeTime(start)}>
-            {formatDayMonthTime(start)}
-          </Link>
+          <span title={relativeTime(start)}>{formatDayMonthTime(start)}</span>
         ) : (
           <span className="muted">-</span>
         )}
@@ -135,12 +142,9 @@ export function JobRow({ job, canManage, onAction, queuedStarts }) {
 
       <div className="job-end">
         {end ? (
-          <Link
-            to={`/details/${job.uid}`}
-            title={end.estimated ? 'Estimated end time' : relativeTime(end.date)}
-          >
+          <span title={end.estimated ? 'Estimated end time' : relativeTime(end.date)}>
             {end.estimated ? `~${formatDayMonthTime(end.date)}` : formatDayMonthTime(end.date)}
-          </Link>
+          </span>
         ) : (
           <span className="muted">-</span>
         )}
@@ -148,7 +152,7 @@ export function JobRow({ job, canManage, onAction, queuedStarts }) {
 
       <DurationCell job={job} />
 
-      <div className="job-state">
+      <div className="job-state" onClick={(event) => event.stopPropagation()}>
         <StateCell job={job} canManage={canManage} onAction={onAction} />
       </div>
     </li>

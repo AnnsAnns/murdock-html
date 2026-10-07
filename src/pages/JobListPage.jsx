@@ -8,14 +8,18 @@ import {
   queryStringToQueryParams,
 } from '../api/query';
 import { useAuth } from '../auth/AuthContext';
+import { CurrentJob } from '../components/CurrentJob';
+import { JobActions } from '../components/JobActions';
 import { JobFilters } from '../components/JobFilters';
 import { JobList } from '../components/JobList';
+import { JobSection } from '../components/JobSection';
 import { ShowMore } from '../components/ShowMore';
 import { Spinner } from '../components/Spinner';
 import { useToast } from '../components/Toast';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useMurdockSocket } from '../hooks/useMurdockSocket';
 import { estimateQueuedStarts, jobContext } from '../utils/job';
+import { FINISHED_STATES } from '../utils/state';
 
 // How many running/queued jobs to look at when estimating queued start times.
 const QUEUE_LOOKAHEAD = 100;
@@ -29,6 +33,7 @@ export function JobListPage() {
   const [loaded, setLoaded] = useState(false);
   const [refreshToken, setRefreshToken] = useState(0);
   const [queue, setQueue] = useState([]);
+  const [expandedUid, setExpandedUid] = useState(null);
   const [draft, setDraft] = useState({
     sha: params.sha,
     author: params.author,
@@ -120,6 +125,10 @@ export function JobListPage() {
   const onDraftChange = (field, value) => setDraft((current) => ({ ...current, [field]: value }));
   const onCommit = () => update(draft);
   const showMore = () => update({ limit: Number(params.limit) + ITEMS_DISPLAYED_STEP });
+  const toggleExpand = useCallback(
+    (uid) => setExpandedUid((current) => (current === uid ? null : uid)),
+    [],
+  );
 
   const onAction = useCallback(
     async (job, action) => {
@@ -141,6 +150,12 @@ export function JobListPage() {
     [notify, user],
   );
 
+  // The dashboard groups the (filtered) job stream into three panels.
+  const running = jobs.find((job) => job.state === 'running');
+  const queued = jobs.filter((job) => job.state === 'queued');
+  const past = jobs.filter((job) => FINISHED_STATES.includes(job.state));
+  const hasMore = jobs.length >= Number(params.limit);
+
   return (
     <>
       <JobFilters
@@ -156,17 +171,69 @@ export function JobListPage() {
       {!loaded ? (
         <Spinner />
       ) : jobs.length ? (
-        <JobList
-          jobs={jobs}
-          canManage={canManage}
-          onAction={onAction}
-          queuedStarts={queuedStarts}
-        />
+        <div className="dashboard">
+          <JobSection
+            title="Current Job"
+            icon="gear"
+            state={running?.state}
+            action={
+              running && (
+                <JobActions
+                  job={running}
+                  canManage={canManage}
+                  onAction={(action) => onAction(running, action)}
+                />
+              )
+            }
+          >
+            {running ? (
+              <CurrentJob job={running} />
+            ) : (
+              <p className="muted">No job is running right now.</p>
+            )}
+          </JobSection>
+
+          <JobSection
+            title="Queued Jobs"
+            icon="inbox"
+            state={queued.length ? 'queued' : undefined}
+            count={queued.length}
+          >
+            {queued.length ? (
+              <JobList
+                jobs={queued}
+                canManage={canManage}
+                onAction={onAction}
+                queuedStarts={queuedStarts}
+                expandedUid={expandedUid}
+                onToggleExpand={toggleExpand}
+              />
+            ) : (
+              <p className="muted">The queue is empty.</p>
+            )}
+          </JobSection>
+
+          <JobSection title="Past Jobs" icon="clock" count={past.length}>
+            {past.length ? (
+              <>
+                <JobList
+                  jobs={past}
+                  canManage={canManage}
+                  onAction={onAction}
+                  queuedStarts={queuedStarts}
+                  expandedUid={expandedUid}
+                  onToggleExpand={toggleExpand}
+                />
+                {hasMore && <ShowMore onClick={showMore} />}
+              </>
+            ) : (
+              <p className="muted">No finished jobs match.</p>
+            )}
+          </JobSection>
+        </div>
       ) : (
         <div className="empty-state">No job matching</div>
       )}
-
-      {loaded && jobs.length >= Number(params.limit) && <ShowMore onClick={showMore} />}
     </>
   );
 }

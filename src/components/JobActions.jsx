@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { FINISHED_STATES } from '../utils/state';
 import { Icon } from './Icon';
 import { Menu } from './Menu';
@@ -17,23 +18,33 @@ export function jobAction(state) {
  * It owns which action a job state allows and how it is labelled, so the two
  * views cannot drift apart. `onAction` is always called with the action name.
  *
- * - `variant="buttons"` renders a labelled button (detail header).
- * - `variant="menu"` renders a "..." menu (job list).
+ * - `variant="buttons"` renders a labelled button (detail header). It only
+ *   appears for maintainers.
+ * - `variant="menu"` renders a "..." menu (job list). The menu is shown to
+ *   everyone — it always offers "Open full page" and only adds the maintainer
+ *   action when `canManage` is set.
  */
-export function JobActions({ job, onAction, busy = false, variant = 'buttons' }) {
+export function JobActions({ job, canManage = false, onAction, busy = false, variant = 'buttons' }) {
   const action = jobAction(job.state);
-  if (!action) return null;
 
   if (variant === 'menu') {
     return (
-      <Menu label={`${action.label} job`} trigger={<Icon name="more" />}>
-        <button type="button" className="menu-item" onClick={() => onAction(action.action)}>
-          <Icon name={action.icon} />
-          <span>{action.label}</span>
-        </button>
+      <Menu label="Job actions" trigger={<Icon name="more" />}>
+        <Link className="menu-item" to={`/details/${job.uid}`}>
+          <Icon name="external" />
+          <span>Open full page</span>
+        </Link>
+        {canManage && action && (
+          <button type="button" className="menu-item" onClick={() => onAction(action.action)}>
+            <Icon name={action.icon} />
+            <span>{action.label}</span>
+          </button>
+        )}
       </Menu>
     );
   }
+
+  if (!canManage || !action) return null;
 
   return (
     <button

@@ -20,7 +20,7 @@ export function JobHeader({ job, canManage, onAction, busy = false }) {
         )}
       </span>
       <StateBadge state={job.state} />
-      {canManage && <JobActions job={job} onAction={onAction} busy={busy} />}
+      <JobActions job={job} canManage={canManage} onAction={onAction} busy={busy} />
     </div>
   );
 }
