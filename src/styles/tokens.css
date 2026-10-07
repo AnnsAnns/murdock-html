@@ -1,5 +1,5 @@
-/* Design tokens. The palette is built around the two RIOT-OS brand colours
-   (green #40A687, red #BC202A) and follows the system light/dark preference. */
+/* Design tokens. Near-white light theme, near-black dark theme, with a soft
+   green accent. Follows the system light/dark preference. */
 
 /* ---- self-hosted fonts (copied from Bort/public/fonts) ---- */
 @font-face {
@@ -18,9 +18,9 @@
 }
 
 :root {
-  /* RIOT-OS brand colours */
-  --riot-green: #40a687;
-  --riot-red: #bc202a;
+  /* ---- accent: a soft but saturated take on the RIOT green #40a687 ---- */
+  --brand: #57c8a2; /* mint-green accent */
+  --on-accent: #17352c; /* dark text/icon colour on accent surfaces */
 
   --font-bodyf: "National Park", "Helvetica", sans-serif;
   --font-headerf: "Reglisse Fill", "Arial Black", sans-serif;
@@ -30,39 +30,43 @@
   --panel-max: 1280px;
 
   /* Job states are semantic and theme-independent so pass/fail stay readable. */
-  --state-passed: var(--riot-green);
+  --state-passed: #3f8f5c;
   --state-passed-contrast: #ffffff;
-  --state-errored: var(--riot-red);
+  --state-errored: #b02a37;
   --state-errored-contrast: #ffffff;
-  --state-running: #d98200;
-  --state-running-contrast: #1b1b1b;
-  --state-queued: #3f6fd1;
+  --state-running: #a96a16;
+  --state-running-contrast: #ffffff;
+  --state-queued: #4e7fa8;
   --state-queued-contrast: #ffffff;
-  --state-stopped: #6b7280;
+  --state-stopped: #7d7780;
   --state-stopped-contrast: #ffffff;
+
+  /* Dark log/terminal surfaces (same in both themes). */
+  --terminal-background: #15131a;
+  --terminal-text: #f2cb9b;
 
   /* Let native controls and scrollbars follow the active scheme. */
   color-scheme: light dark;
 
-  /* ---- light theme (default) ---- */
-  --base-text-color: #1b242e;
-  --box-color-standard: var(--riot-green);
-  --base-background-color: #f8fcfa;
-  --base-bd-background-color: #cde7dd;
-  --border: color-mix(in srgb, var(--riot-green) 52%, transparent);
-  --focus-color: var(--riot-green);
-  --link-color: #256b55;
+  /* ---- light theme: white cards on a near-white page ---- */
+  --base-text-color: #241f26;
+  --box-color-standard: var(--brand);
+  --base-background-color: #ffffff;
+  --base-bd-background-color: #f6f4ef;
+  --border: color-mix(in srgb, var(--base-text-color) 14%, transparent);
+  --focus-color: #2f8a6d;
+  --link-color: #b23a48;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    /* ---- dark theme: same green-tinted surfaces, one step lighter than
-       the page so cards still read as elevated ---- */
-    --base-text-color: #e7efec;
-    --base-background-color: #1c2924;
-    --base-bd-background-color: #0f1815;
-    --border: color-mix(in srgb, var(--riot-green) 50%, transparent);
-    --link-color: #7ad4b4;
+    /* ---- dark theme: near-black cards on black ---- */
+    --base-text-color: #f4f1ea;
+    --base-background-color: #1c1b1f;
+    --base-bd-background-color: #111013;
+    --border: color-mix(in srgb, var(--base-text-color) 18%, transparent);
+    --focus-color: #57c8a2;
+    --link-color: #e8a08a;
   }
 }
 

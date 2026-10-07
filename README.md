@@ -3,8 +3,8 @@
 The web UI for the [Murdock](https://ci.riot-os.org) continuous integration
 server. A single-page app built with **Vite + React** and **vanilla CSS**
 (native nesting, no CSS framework), styled after the Bort/Kaeru design language
-and built around the two RIOT-OS brand colours (green `#40A687`, red `#BC202A`).
-The palette follows the system light/dark preference (`prefers-color-scheme`).
+with a soft green accent (`#57C8A2`) on a near-white or near-black base. The
+palette follows the system light/dark preference (`prefers-color-scheme`).
 
 It talks to the Murdock API at `ci.riot-os.org` and to the live status
 WebSocket, and lets maintainers cancel, abort or restart jobs after signing in

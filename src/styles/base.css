@@ -167,7 +167,7 @@ textarea {
 
       &.active {
         background: var(--box-color-standard);
-        color: var(--base-background-color);
+        color: var(--on-accent);
       }
     }
   }
