@@ -12,6 +12,7 @@ import { ActiveTimeBar } from '../components/ActiveTimeBar';
 import { CurrentJob } from '../components/CurrentJob';
 import { JobDetail } from '../components/JobDetail';
 import { JobFilters } from '../components/JobFilters';
+import { useFilters } from '../components/FiltersContext';
 import { JobList } from '../components/JobList';
 import { JobSection } from '../components/JobSection';
 import { ShowMore } from '../components/ShowMore';
@@ -46,6 +47,7 @@ export function JobListPage() {
   const [refreshToken, setRefreshToken] = useState(0);
   const [queue, setQueue] = useState<Job[]>([]);
   const [expandedUid, setExpandedUid] = useState<string | null>(null);
+  const { open: filtersOpen } = useFilters();
   const [draft, setDraft] = useState<DraftParams>({
     sha: params.sha,
     author: params.author,
@@ -183,22 +185,22 @@ export function JobListPage() {
 
   return (
     <div className={dashboard.dashboard}>
-      <aside className={dashboard.sidebar}>
-        <JobFilters
-          params={params}
-          draft={draft}
-          onType={onType}
-          onToggleHiddenState={onToggleHiddenState}
-          onClearStates={onClearStates}
-          onToggleHiddenPrState={onToggleHiddenPrState}
-          onDraftChange={onDraftChange}
-          onCommit={onCommit}
-          onReset={onReset}
-        />
-      </aside>
-
       <div className={dashboard.content}>
         {loaded && <ActiveTimeBar jobs={jobs} refreshing={refreshing} />}
+
+        {filtersOpen && (
+          <JobFilters
+            params={params}
+            draft={draft}
+            onType={onType}
+            onToggleHiddenState={onToggleHiddenState}
+            onClearStates={onClearStates}
+            onToggleHiddenPrState={onToggleHiddenPrState}
+            onDraftChange={onDraftChange}
+            onCommit={onCommit}
+            onReset={onReset}
+          />
+        )}
 
         {!loaded ? (
           <Spinner />

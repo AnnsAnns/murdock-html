@@ -46,23 +46,11 @@ export function JobFilters({
   const hiddenCount = STATES.length - params.states.length;
   const noneHidden = hiddenCount === 0;
 
-  // How far the applied filters deviate from the defaults.
-  const activeCount =
-    (params.type !== 'all' ? 1 : 0) +
-    (noneHidden ? 0 : 1) +
-    (params.type === 'pr' && (!params.prstates.open || !params.prstates.closed) ? 1 : 0) +
-    (params.sha ? 1 : 0) +
-    (params.author ? 1 : 0) +
-    (params.type === 'pr' && params.prnum ? 1 : 0) +
-    (params.type === 'branch' && params.branch ? 1 : 0) +
-    (params.type === 'tag' && params.tag ? 1 : 0);
-
   return (
-    <section className={`${box.box} ${filters.filterPanel}`}>
+    <section id="job-filters" className={box.box}>
       <div className={box.boxTitle}>
         <Icon name="filter" size={14} />
         <span className={box.titleLabel}>Filters</span>
-        {activeCount > 0 && <span className={filters.activeBadge}>{activeCount} active</span>}
       </div>
 
       <div className={`${box.boxBody} ${filters.filterBody}`}>

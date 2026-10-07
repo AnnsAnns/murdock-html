@@ -1,19 +1,6 @@
 /* ============================================================
    Filter panel
    ============================================================ */
-.filterPanel {
-  /* Active-filter count in the title bar. */
-  .activeBadge {
-    margin-left: auto;
-    padding: 2px 8px;
-    border-radius: 999px;
-    background: color-mix(in srgb, var(--on-accent) 25%, transparent);
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.4px;
-    white-space: nowrap;
-  }
-}
 
 /* The panel is a vertical column of labelled sections. */
 .filterBody {

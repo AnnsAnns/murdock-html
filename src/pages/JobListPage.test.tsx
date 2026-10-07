@@ -3,6 +3,8 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AuthProvider } from '../auth/AuthContext';
+import { FiltersProvider } from '../components/FiltersContext';
+import { NavBar } from '../components/NavBar';
 import { ToastProvider } from '../components/Toast';
 import { JobListPage } from './JobListPage';
 import type { Job, JobState } from '../types';
@@ -51,7 +53,25 @@ function renderPage() {
     <MemoryRouter>
       <AuthProvider>
         <ToastProvider>
-          <JobListPage />
+          <FiltersProvider>
+            <JobListPage />
+          </FiltersProvider>
+        </ToastProvider>
+      </AuthProvider>
+    </MemoryRouter>,
+  );
+}
+
+/** The dashboard as the app mounts it, so the top-bar toggle is present. */
+function renderDashboard() {
+  return render(
+    <MemoryRouter initialEntries={['/']}>
+      <AuthProvider>
+        <ToastProvider>
+          <FiltersProvider>
+            <NavBar />
+            <JobListPage />
+          </FiltersProvider>
         </ToastProvider>
       </AuthProvider>
     </MemoryRouter>,
@@ -62,20 +82,27 @@ describe('JobListPage', () => {
   it('renders the fetched jobs', async () => {
     renderPage();
     expect(await screen.findByText(/core: fix the thing/)).toBeInTheDocument();
-    // "Success" appears on the row's state badge and on the state filter toggle.
+    // "Success" appears on the row's state badge.
     expect(screen.getAllByText('Success').length).toBeGreaterThan(0);
     // 42s appears in both the row duration and the active-time bar.
     expect(screen.getAllByText('42s').length).toBeGreaterThan(0);
   });
 
-  it('keeps the filters in a sidebar next to the jobs', async () => {
-    renderPage();
+  it('reveals the filter panel from the top-bar toggle', async () => {
+    renderDashboard();
 
-    const sidebar = await screen.findByRole('complementary');
-    expect(sidebar).toContainElement(screen.getByText('Filters'));
+    // Hidden until the "Show Filters" button is clicked.
+    const toggle = await screen.findByRole('button', { name: 'Show Filters' });
+    expect(toggle).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.queryByText('Filters')).not.toBeInTheDocument();
 
-    // The job stream sits beside the filters, not inside them.
-    expect(sidebar).not.toContainElement(await screen.findByText('Current Job'));
+    await userEvent.click(toggle);
+
+    expect(await screen.findByText('Filters')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Show Filters' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
   });
 
   it('groups jobs into Current, Queued and Past sections', async () => {

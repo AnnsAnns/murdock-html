@@ -1,0 +1,42 @@
+/* ============================================================
+   Top-bar filter toggle
+   ============================================================ */
+.filterToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  background: transparent;
+  color: inherit;
+  font-size: 13px;
+  white-space: nowrap;
+  cursor: pointer;
+
+  &:hover {
+    background: color-mix(in srgb, var(--box-color-standard) 25%, transparent);
+  }
+
+  &.isOn {
+    border-color: var(--box-color-standard);
+    background: var(--box-color-standard);
+    color: var(--on-accent);
+  }
+}
+
+/* Active-filter count, shown when at least one filter deviates from default. */
+.count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--state-errored);
+  color: var(--state-errored-contrast);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+}

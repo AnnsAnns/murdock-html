@@ -1,11 +1,21 @@
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useLocation, useSearchParams } from 'react-router-dom';
 import { API_BASE, GITHUB_REPO_URL, PRIVACY_URL } from '../api/config';
+import { activeFilterCount, queryStringToQueryParams } from '../api/query';
 import frog from '../imgs/frog.webp';
 import controls from '../styles/controls.module.css';
 import { Icon } from './Icon';
 import { GithubLoginButton } from '../auth/GithubLoginButton';
+import { useFilters } from './FiltersContext';
+import nav from './NavBar.module.css';
 
 export function NavBar() {
+  const { pathname } = useLocation();
+  const [searchParams] = useSearchParams();
+  const { open, toggle } = useFilters();
+
+  const onDashboard = pathname === '/';
+  const activeCount = activeFilterCount(queryStringToQueryParams(searchParams.toString()));
+
   return (
     <header className="topbar">
       <Link to="/" className="brand">
@@ -26,6 +36,20 @@ export function NavBar() {
       </nav>
 
       <div className="topbar-actions">
+        {onDashboard && (
+          <button
+            type="button"
+            className={`${nav.filterToggle}${open ? ` ${nav.isOn}` : ''}`}
+            aria-pressed={open}
+            aria-controls="job-filters"
+            title={open ? 'Hide filters' : 'Show filters'}
+            onClick={toggle}
+          >
+            <Icon name="filter" size={15} />
+            <span>Show Filters</span>
+            {activeCount > 0 && <span className={nav.count}>{activeCount}</span>}
+          </button>
+        )}
         <a
           className={controls.iconBtn}
           href={GITHUB_REPO_URL}

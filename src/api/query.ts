@@ -22,6 +22,20 @@ export function defaultQuery(): QueryParams {
   };
 }
 
+/** How far the applied filters deviate from the defaults. */
+export function activeFilterCount(params: QueryParams): number {
+  return (
+    (params.type !== 'all' ? 1 : 0) +
+    (params.states.length < STATES.length ? 1 : 0) +
+    (params.type === 'pr' && (!params.prstates.open || !params.prstates.closed) ? 1 : 0) +
+    (params.sha ? 1 : 0) +
+    (params.author ? 1 : 0) +
+    (params.type === 'pr' && params.prnum ? 1 : 0) +
+    (params.type === 'branch' && params.branch ? 1 : 0) +
+    (params.type === 'tag' && params.tag ? 1 : 0)
+  );
+}
+
 export function queryParamsToApiQuery(params: QueryParams): string {
   const parts = [`limit=${params.limit}`, `states=${params.states.join('+')}`];
 
