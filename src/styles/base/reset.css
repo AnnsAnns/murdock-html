@@ -39,7 +39,7 @@ h4,
 h5,
 h6 {
   font-family: var(--font-headerf);
-  font-weight: normal;
+  font-weight: var(--font-header-weight);
   letter-spacing: 0.4px;
   margin: 0 0 0.4em;
   line-height: 1.15;

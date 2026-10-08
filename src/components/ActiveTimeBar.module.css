@@ -23,6 +23,7 @@
   .activeTimeTitle {
     margin-right: auto;
     font-family: var(--font-headerf);
+    font-weight: var(--font-header-weight);
     font-size: 15px;
     letter-spacing: 0.5px;
   }

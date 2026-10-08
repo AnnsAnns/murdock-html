@@ -59,6 +59,7 @@
 
     .statValue {
       font-family: var(--font-headerf);
+      font-weight: var(--font-header-weight);
       font-size: 15px;
     }
 

@@ -1,18 +1,48 @@
 /* Design tokens. Near-white light theme, near-black dark theme, with a soft
    green accent. Follows the system light/dark preference. */
 
-/* ---- self-hosted fonts (copied from Bort/public/fonts) ---- */
+/* ---- self-hosted fonts (public/fonts) ----
+   Fira Sans for prose, Fira Code for headings and monospaced output. Both are
+   SIL Open Font License 1.1 and are served from this project, never a CDN. */
 @font-face {
-  font-family: "National Park";
-  src: url("/fonts/NationalPark-Regular.otf") format("opentype");
-  font-weight: normal;
+  font-family: "Fira Sans";
+  src: url("/fonts/FiraSans-Regular.woff2") format("woff2");
+  font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
-  font-family: "LxgwWenKai";
-  src: url("/fonts/LXGWWenKaiTC-Bold.ttf") format("truetype");
-  font-weight: normal;
+  font-family: "Fira Sans";
+  src: url("/fonts/FiraSans-SemiBold.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Fira Sans";
+  src: url("/fonts/FiraSans-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Fira Code";
+  src: url("/fonts/FiraCode-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Fira Code";
+  src: url("/fonts/FiraCode-SemiBold.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Fira Code";
+  src: url("/fonts/FiraCode-Bold.woff2") format("woff2");
+  font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
@@ -28,9 +58,11 @@
   --overlay-strong: rgba(255, 255, 255, 0.45);
   --progress-stripe: rgba(255, 255, 255, 0.25);
 
-  --font-bodyf: "National Park", "Helvetica", sans-serif;
-  --font-headerf: "LxgwWenKai", "Arial Black", sans-serif;
-  --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --font-bodyf: "Fira Sans", "Helvetica", sans-serif;
+  --font-headerf: "Fira Code", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --font-mono: "Fira Code", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  /* Headings use the mono face, which needs a weight to keep their presence. */
+  --font-header-weight: 600;
 
   --radius: 4px;
   --panel-max: 1280px;
