@@ -48,8 +48,9 @@ export type IconName =
 /** Lifecycle states a Murdock job can be in. */
 export type JobState = 'queued' | 'running' | 'passed' | 'errored' | 'stopped';
 
-/** The kind of jobs the dashboard filters by. */
-export type JobType = 'all' | 'pr' | 'branch' | 'tag';
+/** The kind of jobs the dashboard filters by. `merge-queue` and `nightly` are
+ *  branch jobs the API cannot separate, so they are refined client-side. */
+export type JobType = 'all' | 'pr' | 'branch' | 'merge-queue' | 'nightly' | 'tag';
 
 /** Maintainer actions exposed on a job. */
 export type JobActionName = 'cancel' | 'abort' | 'restart';
@@ -215,10 +216,15 @@ export interface QueryParams {
   tag: string;
   sha: string;
   author: string;
+  search: string;
+  labels: string[];
 }
 
 /** Locally drafted text filters before they are committed to the URL. */
-export type DraftParams = Pick<QueryParams, 'sha' | 'author' | 'prnum' | 'branch' | 'tag'>;
+export type DraftParams = Pick<
+  QueryParams,
+  'sha' | 'author' | 'prnum' | 'branch' | 'tag' | 'search'
+>;
 
 /** Messages pushed over Murdock's status WebSocket. */
 export type SocketMessage =

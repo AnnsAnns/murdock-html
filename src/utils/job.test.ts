@@ -5,7 +5,10 @@ import {
   estimateQueuedStarts,
   estimatedRuntime,
   isMergeQueue,
+  isNightly,
   jobEnd,
+  jobLabels,
+  jobMatchesSearch,
   jobRefLink,
   jobStartDate,
   jobTitleUrl,
@@ -21,11 +24,51 @@ const job = (overrides: Partial<Job> = {}): Job => ({
   ...overrides,
 });
 
+describe('jobLabels', () => {
+  it('prefers the PR labels', () => {
+    expect(jobLabels(job({ prinfo: { number: 1, labels: ['Area: core', 'CI: full build'] } }))).toEqual([
+      'Area: core',
+      'CI: full build',
+    ]);
+  });
+
+  it('falls back to the CI_PULL_LABELS env', () => {
+    expect(jobLabels(job({ env: { CI_PULL_LABELS: 'Area: core;CI: full build' } }))).toEqual([
+      'Area: core',
+      'CI: full build',
+    ]);
+  });
+
+  it('returns nothing without labels', () => {
+    expect(jobLabels(job())).toEqual([]);
+  });
+});
+
+describe('jobMatchesSearch', () => {
+  it('matches the commit message, PR title or ref, case-insensitively', () => {
+    expect(jobMatchesSearch(job(), 'FIX THE THING')).toBe(true);
+    expect(jobMatchesSearch(job({ prinfo: { number: 1, title: 'Add frobs' } }), 'frobs')).toBe(true);
+    expect(jobMatchesSearch(job({ ref: 'refs/heads/gh-readonly-queue/master/pr-1' }), 'queue')).toBe(
+      true,
+    );
+    expect(jobMatchesSearch(job(), 'nope')).toBe(false);
+  });
+});
+
 describe('isMergeQueue', () => {
   it('detects the GitHub merge queue ref', () => {
     expect(isMergeQueue('refs/heads/gh-readonly-queue/master/pr-1')).toBe(true);
     expect(isMergeQueue('refs/heads/master')).toBe(false);
     expect(isMergeQueue(undefined)).toBe(false);
+  });
+});
+
+describe('isNightly', () => {
+  it('detects the NIGHTLY env flag', () => {
+    expect(isNightly({ NIGHTLY: '1' })).toBe(true);
+    expect(isNightly({ NIGHTLY: '0' })).toBe(false);
+    expect(isNightly({})).toBe(false);
+    expect(isNightly(undefined)).toBe(false);
   });
 });
 

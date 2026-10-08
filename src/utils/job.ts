@@ -22,6 +22,32 @@ export function isMergeQueue(ref: string | undefined): boolean {
   );
 }
 
+/** A scheduled nightly run, flagged by the CI via the NIGHTLY env var. */
+export function isNightly(env: Record<string, string> | undefined): boolean {
+  return env?.NIGHTLY === '1';
+}
+
+/** Labels attached to a job, from PR info or the CI_PULL_LABELS env. */
+export function jobLabels(job: Pick<Job, 'prinfo' | 'env'>): string[] {
+  if (job.prinfo?.labels?.length) return job.prinfo.labels;
+  const raw = job.env?.CI_PULL_LABELS;
+  return raw ? raw.split(';').filter(Boolean) : [];
+}
+
+/** Case-insensitive match of a term against a job's message, PR title or ref. */
+export function jobMatchesSearch(
+  job: Pick<Job, 'commit' | 'prinfo' | 'ref'>,
+  term: string,
+): boolean {
+  const needle = term.trim().toLowerCase();
+  if (!needle) return true;
+  const haystack = [job.commit?.message, job.prinfo?.title, job.ref]
+    .filter((value): value is string => Boolean(value))
+    .join('\n')
+    .toLowerCase();
+  return haystack.includes(needle);
+}
+
 /** Human representation of a job's ref (branch/tag/merge-queue). */
 export function refRepr(job: Pick<Job, 'ref' | 'commit'>): string {
   const ref = job.ref;

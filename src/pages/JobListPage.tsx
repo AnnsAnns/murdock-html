@@ -20,7 +20,14 @@ import { Spinner } from '../components/Spinner';
 import { useToast } from '../components/Toast';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
 import { useMurdockSocket } from '../hooks/useMurdockSocket';
-import { estimateQueuedStarts, jobContext } from '../utils/job';
+import {
+  estimateQueuedStarts,
+  isMergeQueue,
+  isNightly,
+  jobContext,
+  jobLabels,
+  jobMatchesSearch,
+} from '../utils/job';
 import dashboard from '../components/JobListPage.module.css';
 import { withViewTransition } from '../utils/viewTransition';
 import { FINISHED_STATES, STATES } from '../utils/state';
@@ -54,6 +61,7 @@ export function JobListPage() {
     prnum: params.prnum,
     branch: params.branch,
     tag: params.tag,
+    search: params.search,
   });
 
   const { canManage, user } = useAuth();
@@ -69,8 +77,9 @@ export function JobListPage() {
       prnum: params.prnum,
       branch: params.branch,
       tag: params.tag,
+      search: params.search,
     });
-  }, [params.sha, params.author, params.prnum, params.branch, params.tag]);
+  }, [params.sha, params.author, params.prnum, params.branch, params.tag, params.search]);
 
   // Fetch the (filtered) job list and the global running/queued queue together
   // so a refresh swaps both in one animated commit. Crucially the previous data
@@ -143,6 +152,13 @@ export function JobListPage() {
     });
   const onToggleHiddenPrState = (key: 'open' | 'closed') =>
     update({ prstates: { ...params.prstates, [key]: !params.prstates[key] } });
+  const onToggleLabel = (label: string) =>
+    update({
+      labels: params.labels.includes(label)
+        ? params.labels.filter((entry) => entry !== label)
+        : [...params.labels, label],
+    });
+  const onClearLabels = () => update({ labels: [] });
   // The state filters are inverted: "clear" removes every exclusion, showing
   // all states again (the API still receives the included states).
   const onClearStates = () => update({ states: [...STATES] });
@@ -151,6 +167,7 @@ export function JobListPage() {
   const onCommit = () => update(draft);
   const onReset = () => setSearchParams(new URLSearchParams());
   const showMore = () => update({ limit: Number(params.limit) + ITEMS_DISPLAYED_STEP });
+  const onLimit = (limit: number) => update({ limit });
   const toggleExpand = useCallback(
     (uid: string) =>
       withViewTransition(() => setExpandedUid((current) => (current === uid ? null : uid))),
@@ -177,16 +194,30 @@ export function JobListPage() {
     [notify, user],
   );
 
+  // Merge-queue and nightly jobs are branches to the API, so those kinds are
+  // refined here, as are labels and free text.
+  const visibleJobs = useMemo(() => {
+    let list = jobs;
+    if (params.type === 'merge-queue') list = list.filter((job) => isMergeQueue(job.ref));
+    else if (params.type === 'nightly') list = list.filter((job) => isNightly(job.env));
+    if (params.labels.length) {
+      list = list.filter((job) => jobLabels(job).some((label) => params.labels.includes(label)));
+    }
+    const term = params.search.trim();
+    if (term) list = list.filter((job) => jobMatchesSearch(job, term));
+    return list;
+  }, [jobs, params.type, params.labels, params.search]);
+
   // The dashboard groups the (filtered) job stream into three panels.
-  const running = jobs.find((job) => job.state === 'running');
-  const queued = jobs.filter((job) => job.state === 'queued');
-  const past = jobs.filter((job) => FINISHED_STATES.includes(job.state));
+  const running = visibleJobs.find((job) => job.state === 'running');
+  const queued = visibleJobs.filter((job) => job.state === 'queued');
+  const past = visibleJobs.filter((job) => FINISHED_STATES.includes(job.state));
   const hasMore = jobs.length >= Number(params.limit);
 
   return (
     <div className={dashboard.dashboard}>
       <div className={dashboard.content}>
-        {loaded && <ActiveTimeBar jobs={jobs} refreshing={refreshing} />}
+        {loaded && <ActiveTimeBar jobs={visibleJobs} refreshing={refreshing} />}
 
         {filtersOpen && (
           <JobFilters
@@ -196,15 +227,18 @@ export function JobListPage() {
             onToggleHiddenState={onToggleHiddenState}
             onClearStates={onClearStates}
             onToggleHiddenPrState={onToggleHiddenPrState}
+            onToggleLabel={onToggleLabel}
+            onClearLabels={onClearLabels}
             onDraftChange={onDraftChange}
             onCommit={onCommit}
+            onLimit={onLimit}
             onReset={onReset}
           />
         )}
 
         {!loaded ? (
           <Spinner />
-        ) : jobs.length ? (
+        ) : visibleJobs.length ? (
           <>
             <JobSection title="Current Job" icon="gear" state={running?.state}>
               {running ? (

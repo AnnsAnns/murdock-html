@@ -143,6 +143,116 @@ describe('JobListPage', () => {
     expect(screen.getByText(/past: already done/)).toBeInTheDocument();
   });
 
+  it('shows only merge-queue jobs for the merges kind', async () => {
+    const master: Job = {
+      ...job,
+      uid: 'branchmaster',
+      commit: { ...job.commit, message: 'regular: a branch' },
+    };
+    const mergeQueue: Job = {
+      ...job,
+      uid: 'queueentry',
+      ref: 'refs/heads/gh-readonly-queue/master/pr-1-abcdef',
+      commit: { ...job.commit, message: 'queued: an entry' },
+    };
+    fetchMock.mockImplementation((url: RequestInfo | URL) =>
+      String(url).includes('/jobs') ? jsonResponse([master, mergeQueue]) : Promise.reject(),
+    );
+
+    render(
+      <MemoryRouter initialEntries={['/?type=merge-queue']}>
+        <AuthProvider>
+          <ToastProvider>
+            <FiltersProvider>
+              <JobListPage />
+            </FiltersProvider>
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText(/queued: an entry/)).toBeInTheDocument();
+    expect(screen.queryByText(/regular: a branch/)).not.toBeInTheDocument();
+  });
+
+  it('shows only nightly jobs for the nightlies kind', async () => {
+    const nightly: Job = {
+      ...job,
+      uid: 'nightly',
+      env: { NIGHTLY: '1' },
+      commit: { ...job.commit, message: 'nightly: full run' },
+    };
+    const regular: Job = {
+      ...job,
+      uid: 'regular',
+      commit: { ...job.commit, message: 'regular: normal run' },
+    };
+    fetchMock.mockImplementation((url: RequestInfo | URL) =>
+      String(url).includes('/jobs') ? jsonResponse([nightly, regular]) : Promise.reject(),
+    );
+
+    render(
+      <MemoryRouter initialEntries={['/?type=nightly']}>
+        <AuthProvider>
+          <ToastProvider>
+            <FiltersProvider>
+              <JobListPage />
+            </FiltersProvider>
+          </ToastProvider>
+        </AuthProvider>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText(/nightly: full run/)).toBeInTheDocument();
+    expect(screen.queryByText(/regular: normal run/)).not.toBeInTheDocument();
+  });
+
+  it('filters by PR label on the client', async () => {
+    const labeled: Job = {
+      ...job,
+      uid: 'labeled',
+      prinfo: { number: 1, title: 'labeled: build it', labels: ['CI: full build'] },
+    };
+    const plain: Job = {
+      ...job,
+      uid: 'plain',
+      prinfo: { number: 2, title: 'plain: no label', labels: ['Area: core'] },
+    };
+    fetchMock.mockImplementation((url: RequestInfo | URL) =>
+      String(url).includes('/jobs') ? jsonResponse([labeled, plain]) : Promise.reject(),
+    );
+
+    renderDashboard();
+    await userEvent.click(await screen.findByRole('button', { name: 'Show Filters' }));
+    await userEvent.click(await screen.findByRole('button', { name: 'CI: full build' }));
+
+    expect(await screen.findByText(/labeled: build it/)).toBeInTheDocument();
+    expect(screen.queryByText(/plain: no label/)).not.toBeInTheDocument();
+  });
+
+  it('searches the loaded jobs by text', async () => {
+    const match: Job = {
+      ...job,
+      uid: 'match',
+      commit: { ...job.commit, message: 'needle: found it' },
+    };
+    const other: Job = {
+      ...job,
+      uid: 'other',
+      commit: { ...job.commit, message: 'haystack: elsewhere' },
+    };
+    fetchMock.mockImplementation((url: RequestInfo | URL) =>
+      String(url).includes('/jobs') ? jsonResponse([match, other]) : Promise.reject(),
+    );
+
+    renderDashboard();
+    await userEvent.click(await screen.findByRole('button', { name: 'Show Filters' }));
+    await userEvent.type(screen.getByLabelText('Search jobs'), 'needle{Enter}');
+
+    expect(await screen.findByText(/needle: found it/)).toBeInTheDocument();
+    expect(screen.queryByText(/haystack: elsewhere/)).not.toBeInTheDocument();
+  });
+
   it('shows the empty state when there are no jobs', async () => {
     fetchMock.mockImplementation((url: RequestInfo | URL) =>
       String(url).includes('/jobs') ? jsonResponse([]) : Promise.reject(new Error('unexpected')),

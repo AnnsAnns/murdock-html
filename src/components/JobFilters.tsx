@@ -1,5 +1,5 @@
 import type { KeyboardEvent } from 'react';
-import { JOB_TYPES } from '../api/query';
+import { JOB_TYPES, LABEL_OPTIONS, LIMIT_OPTIONS } from '../api/query';
 import box from '../styles/box.module.css';
 import controls from '../styles/controls.module.css';
 import filters from './JobFilters.module.css';
@@ -7,7 +7,14 @@ import { STATES, stateIcon, stateLabel } from '../utils/state';
 import { Icon } from './Icon';
 import type { DraftParams, JobState, JobType, QueryParams } from '../types';
 
-const TYPE_LABELS: Record<JobType, string> = { all: 'All', pr: 'PRs', branch: 'Branches', tag: 'Tags' };
+const TYPE_LABELS: Record<JobType, string> = {
+  all: 'All',
+  pr: 'PRs',
+  branch: 'Branches',
+  'merge-queue': 'Merges',
+  nightly: 'Nightlies',
+  tag: 'Tags',
+};
 
 export interface JobFiltersProps {
   params: QueryParams;
@@ -18,8 +25,12 @@ export interface JobFiltersProps {
   onClearStates: () => void;
   /** Toggle an excluded PR state (`open` / `closed`). */
   onToggleHiddenPrState: (key: 'open' | 'closed') => void;
+  /** Toggle a PR label (client-side, matches any selected label). */
+  onToggleLabel: (label: string) => void;
+  onClearLabels: () => void;
   onDraftChange: (field: keyof DraftParams, value: string) => void;
   onCommit: () => void;
+  onLimit: (limit: number) => void;
   onReset: () => void;
 }
 
@@ -32,8 +43,11 @@ export function JobFilters({
   onToggleHiddenState,
   onClearStates,
   onToggleHiddenPrState,
+  onToggleLabel,
+  onClearLabels,
   onDraftChange,
   onCommit,
+  onLimit,
   onReset,
 }: JobFiltersProps) {
   const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
@@ -68,6 +82,24 @@ export function JobFilters({
                 {TYPE_LABELS[type]}
               </button>
             ))}
+          </div>
+        </div>
+
+        <div className={filters.filterSection}>
+          <span className={filters.filterLabel}>Search</span>
+          <div className={controls.inputGroup}>
+            <span className={controls.inputGroupAddon}>
+              <Icon name="search" />
+            </span>
+            <input
+              className={inputClass}
+              type="text"
+              placeholder="Message, PR title or ref"
+              aria-label="Search jobs"
+              value={draft.search}
+              onChange={(event) => onDraftChange('search', event.target.value)}
+              onKeyDown={onKeyDown}
+            />
           </div>
         </div>
 
@@ -119,7 +151,8 @@ export function JobFilters({
               <input
                 className={inputClass}
                 type="text"
-                placeholder="SHA, e.g. 3f9c2ab"
+                placeholder="Full commit SHA"
+                title="Exact match: enter the full 40-character SHA"
                 aria-label="Commit SHA"
                 value={draft.sha}
                 onChange={(event) => onDraftChange('sha', event.target.value)}
@@ -134,7 +167,8 @@ export function JobFilters({
               <input
                 className={inputClass}
                 type="text"
-                placeholder="Author name or email"
+                placeholder="Exact author name"
+                title="Exact match: enter the full commit author name"
                 aria-label="Commit author"
                 value={draft.author}
                 onChange={(event) => onDraftChange('author', event.target.value)}
@@ -208,6 +242,51 @@ export function JobFilters({
                 />
               </div>
             )}
+          </div>
+        </div>
+
+        <div className={filters.filterSection}>
+          <div className={filters.sectionHead}>
+            <span className={filters.filterLabel}>PR labels</span>
+            {params.labels.length > 0 && (
+              <button type="button" className={filters.selectAll} onClick={onClearLabels}>
+                Clear
+              </button>
+            )}
+          </div>
+          <div className={filters.labelList} role="group" aria-label="PR labels">
+            {LABEL_OPTIONS.map((label) => {
+              const on = params.labels.includes(label);
+              return (
+                <button
+                  key={label}
+                  type="button"
+                  className={`${filters.labelChip} ${on ? filters.isOn : ''}`}
+                  aria-pressed={on}
+                  title={`${on ? 'Stop filtering by' : 'Only show jobs labeled'} "${label}"`}
+                  onClick={() => onToggleLabel(label)}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className={filters.filterSection}>
+          <span className={filters.filterLabel}>Total (non-filtered) Jobs to load</span>
+          <div className={filters.segmented} role="group" aria-label="Jobs to load">
+            {LIMIT_OPTIONS.map((option) => (
+              <button
+                key={option}
+                type="button"
+                className={Number(params.limit) === option ? filters.isOn : ''}
+                aria-pressed={Number(params.limit) === option}
+                onClick={() => onLimit(option)}
+              >
+                {option}
+              </button>
+            ))}
           </div>
         </div>
 

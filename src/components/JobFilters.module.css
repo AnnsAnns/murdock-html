@@ -184,6 +184,33 @@
   }
 }
 
+/* ---- label chips ---- */
+.labelList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.labelChip {
+  padding: 6px 10px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  background: transparent;
+  color: inherit;
+  font-size: 12px;
+  cursor: pointer;
+
+  &:hover {
+    background: color-mix(in srgb, var(--base-text-color) 9%, transparent);
+  }
+
+  &.isOn {
+    border-color: var(--box-color-standard);
+    background: var(--box-color-standard);
+    color: var(--on-accent);
+  }
+}
+
 /* ---- footer actions ---- */
 .filterActions {
   display: flex;
