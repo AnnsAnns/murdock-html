@@ -1,0 +1,52 @@
+/* ============================================================
+   Confirm dialog
+   ============================================================ */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: color-mix(in srgb, var(--base-text-color) 35%, transparent);
+}
+
+.dialog {
+  width: min(92vw, 340px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  background: var(--base-background-color);
+  border-radius: var(--radius);
+  box-shadow:
+    0 0 0 3px var(--box-color-standard),
+    4px 4px 0 0 color-mix(in srgb, var(--box-color-standard) 50%, transparent);
+  animation: dialog-in 0.15s ease;
+}
+
+.title {
+  margin: 0;
+  font-size: 15px;
+}
+
+.message {
+  margin: 0;
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+@keyframes dialog-in {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+  }
+}
