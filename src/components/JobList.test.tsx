@@ -18,7 +18,9 @@ const job: Job = {
 };
 
 function renderList(
-  props: Pick<ComponentProps<typeof JobList>, 'canManage' | 'onAction'> & { jobs?: Job[] },
+  props: Pick<ComponentProps<typeof JobList>, 'canManage' | 'onAction' | 'averages'> & {
+    jobs?: Job[];
+  },
 ) {
   const { jobs = [job], ...rest } = props;
   return render(
@@ -48,18 +50,52 @@ describe('JobList', () => {
   });
 
   it('shows the estimated duration on a queued row', () => {
-    const queued: Job = { ...job, uid: 'queued', state: 'queued', start_time: 0 };
-    const nightly: Job = {
+    const full: Job = {
       ...job,
-      uid: 'nightly',
+      uid: 'full',
       state: 'queued',
       start_time: 0,
       env: { NIGHTLY: '1' },
     };
-    renderList({ jobs: [queued, nightly], canManage: false, onAction: () => {} });
+    const normal: Job = {
+      ...job,
+      uid: 'normal',
+      state: 'queued',
+      start_time: 0,
+      ref: undefined,
+      env: { CI_PULL_LABELS: 'CI: ready for build' },
+    };
+    const skip: Job = {
+      ...job,
+      uid: 'skip',
+      state: 'queued',
+      start_time: 0,
+      ref: undefined,
+      env: { CI_PULL_LABELS: 'CI: ready for build;CI: skip compile test' },
+    };
+    renderList({ jobs: [full, normal, skip], canManage: false, onAction: () => {} });
 
-    expect(screen.getByText('15m')).toHaveTextContent('est. 15m');
     expect(screen.getByText('2h')).toHaveTextContent('est. 2h');
+    expect(screen.getByText('15m')).toHaveTextContent('est. 15m');
+    expect(screen.getByText('3m')).toHaveTextContent('est. 3m');
+  });
+
+  it('uses the measured average for a queued row when one is available', () => {
+    const queued: Job = {
+      ...job,
+      uid: 'queued',
+      state: 'queued',
+      start_time: 0,
+      env: { NIGHTLY: '1' },
+    };
+    renderList({
+      jobs: [queued],
+      canManage: false,
+      onAction: () => {},
+      averages: { full: 45 * 60 },
+    });
+
+    expect(screen.getByText('45m')).toHaveTextContent('est. 45m');
   });
 
   it('marks a PR ref link with its GitHub state', () => {

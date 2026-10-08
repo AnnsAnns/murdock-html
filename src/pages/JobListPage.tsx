@@ -27,6 +27,7 @@ import {
   jobContext,
   jobLabels,
   jobMatchesSearch,
+  runtimeAverages,
 } from '../utils/job';
 import dashboard from '../components/JobListPage.module.css';
 import { withViewTransition } from '../utils/viewTransition';
@@ -122,7 +123,10 @@ export function JobListPage() {
     return () => controller.abort();
   }, [apiQuery, refreshToken]);
 
-  const queuedStarts = useMemo(() => estimateQueuedStarts(queue), [queue]);
+  // Runtime estimates come from the jobs we already loaded, so they track the
+  // project's real timings and fall back to the defaults when data is missing.
+  const averages = useMemo(() => runtimeAverages(jobs), [jobs]);
+  const queuedStarts = useMemo(() => estimateQueuedStarts(queue, { averages }), [queue, averages]);
 
   useMurdockSocket((message) => {
     if (message.cmd === 'reload') {
@@ -228,7 +232,7 @@ export function JobListPage() {
   return (
     <div className={dashboard.dashboard}>
       <div className={dashboard.content}>
-        {loaded && <ActiveTimeBar jobs={visibleJobs} refreshing={refreshing} />}
+        {loaded && <ActiveTimeBar jobs={visibleJobs} averages={averages} refreshing={refreshing} />}
 
         {filtersOpen && (
           <JobFilters
@@ -284,6 +288,7 @@ export function JobListPage() {
                   canManage={canManage}
                   onAction={onAction}
                   queuedStarts={queuedStarts}
+                  averages={averages}
                   expandedUid={expandedUid}
                   onToggleExpand={toggleExpand}
                 />

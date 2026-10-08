@@ -10,6 +10,7 @@ import {
   jobStartDate,
   jobTitle,
   jobTooltip,
+  type RuntimeAverages,
 } from '../utils/job';
 import {
   compactDuration,
@@ -26,9 +27,10 @@ import type { Job, JobActionName } from '../types';
 
 interface DurationCellProps {
   job: Job;
+  averages?: RuntimeAverages;
 }
 
-function DurationCell({ job }: DurationCellProps) {
+function DurationCell({ job, averages }: DurationCellProps) {
   const progress = buildProgress(job.status);
 
   if (job.state === 'running') {
@@ -71,8 +73,8 @@ function DurationCell({ job }: DurationCellProps) {
 
   if (job.state === 'queued') {
     return (
-      <div className={jobs.jobDuration} title="Estimated from the job's CI flags">
-        <span className="muted">est.</span> {compactDuration(estimatedRuntime(job))}
+      <div className={jobs.jobDuration} title="Estimated from the loaded jobs of this kind">
+        <span className="muted">est.</span> {compactDuration(estimatedRuntime(job, averages))}
       </div>
     );
   }
@@ -111,6 +113,8 @@ export interface JobRowProps {
   canManage: boolean;
   onAction: (action: JobActionName) => void;
   queuedStarts?: Map<string, number>;
+  /** Measured runtimes per job class, used for the queued estimates. */
+  averages?: RuntimeAverages;
   expanded?: boolean;
   onToggle?: () => void;
 }
@@ -120,6 +124,7 @@ export function JobRow({
   canManage,
   onAction,
   queuedStarts,
+  averages,
   expanded = false,
   onToggle,
 }: JobRowProps) {
@@ -208,7 +213,7 @@ export function JobRow({
         )}
       </div>
 
-      <DurationCell job={job} />
+      <DurationCell job={job} averages={averages} />
 
       <div className={jobs.jobState} onClick={(event) => event.stopPropagation()}>
         <StateCell job={job} canManage={canManage} onAction={onAction} />

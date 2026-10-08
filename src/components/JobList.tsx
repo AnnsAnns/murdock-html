@@ -2,6 +2,7 @@ import { Fragment } from 'react';
 import styles from './JobRow.module.css';
 import { JobDetail } from './JobDetail';
 import { JobRow } from './JobRow';
+import type { RuntimeAverages } from '../utils/job';
 import type { Job, JobActionName } from '../types';
 
 export interface JobListProps {
@@ -9,6 +10,8 @@ export interface JobListProps {
   canManage: boolean;
   onAction: (job: Job, action: JobActionName) => void;
   queuedStarts?: Map<string, number>;
+  /** Measured runtimes per job class, used for the queued estimates. */
+  averages?: RuntimeAverages;
   expandedUid?: string | null;
   onToggleExpand?: (uid: string) => void;
 }
@@ -19,6 +22,7 @@ export function JobList({
   canManage,
   onAction,
   queuedStarts,
+  averages,
   expandedUid,
   onToggleExpand,
 }: JobListProps) {
@@ -42,6 +46,7 @@ export function JobList({
                 canManage={canManage}
                 onAction={(action) => onAction(job, action)}
                 queuedStarts={queuedStarts}
+                averages={averages}
                 expanded={expanded}
                 onToggle={() => onToggleExpand?.(job.uid)}
               />

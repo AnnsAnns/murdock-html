@@ -241,40 +241,99 @@ export function jobEnd(
   return null;
 }
 
-// Typical Murdock runtimes in seconds, used to estimate when queued jobs start.
-// The CI flags in `env` tell the job classes apart: a "skip compile test" run
-// is only a few minutes, a regular build ~15 min, and a full build (or a
-// merge-queue run, which builds everything) ~2 h.
-const SKIP_COMPILE_TEST_RUNTIME = 3 * 60;
-const NORMAL_RUNTIME = 15 * 60;
-const FULL_BUILD_RUNTIME = 2 * 60 * 60;
+// Murdock jobs fall into three runtime classes: everything that builds the
+// whole tree (a full build, the merge queue, a nightly, a branch or a tag),
+// a plain pull-request build, and a pull request that skips the compile test.
+export type JobClass = 'full' | 'normal' | 'skip';
 
-/**
- * Estimated total runtime (seconds) of a job, inferred from the CI flags
- * Murdock records in `env` and the job's ref.
- */
-export function estimatedRuntime(job: Pick<Job, 'env' | 'ref'>): number {
+/** Which runtime class a job belongs to, from its CI flags and ref. */
+export function jobClass(job: Pick<Job, 'env' | 'ref'>): JobClass {
   const labels = job.env?.CI_PULL_LABELS ?? '';
   // The two labels are independent, so a job can carry both. A full build is
   // the heavier instruction, and the safer estimate, so it wins.
-  if (labels.includes('CI: full build')) return FULL_BUILD_RUNTIME;
-  if (labels.includes('CI: skip compile test')) return SKIP_COMPILE_TEST_RUNTIME;
+  if (labels.includes('CI: full build')) return 'full';
+  if (labels.includes('CI: skip compile test')) return 'skip';
+
+  // PR jobs carry no ref and no CI_BUILD_REF, so these only match non-PR jobs.
   const ref = job.ref ?? job.env?.CI_BUILD_REF ?? '';
-  if (isMergeQueue(ref)) return FULL_BUILD_RUNTIME;
-  // Nightlies build and test the whole tree, so they take about as long.
-  if (isNightly(job.env)) return FULL_BUILD_RUNTIME;
-  return NORMAL_RUNTIME;
+  if (isMergeQueue(ref)) return 'full';
+  if (isNightly(job.env)) return 'full';
+  if (ref.startsWith('refs/heads/') || ref.startsWith('refs/tags/')) return 'full';
+  return 'normal';
+}
+
+// Fallback durations (seconds), used until the loaded jobs hold a sample.
+const FALLBACK_RUNTIME: Record<JobClass, number> = {
+  full: 2 * 60 * 60,
+  normal: 15 * 60,
+  skip: 3 * 60,
+};
+
+/** Typical runtime (seconds) per class, measured from the loaded jobs. */
+export type RuntimeAverages = Partial<Record<JobClass, number>>;
+
+/** Middle value of a non-empty list. */
+function median(values: number[]): number {
+  const sorted = [...values].sort((a, b) => a - b);
+  const middle = Math.floor(sorted.length / 2);
+  return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
+}
+
+/**
+ * Median runtime (seconds) per class, measured from the jobs already on
+ * screen. Only successful runs count, so failed and cancelled jobs never
+ * enter the average, and the median keeps a few unusually short passing runs
+ * from dragging it down. Classes with no sample are left out so the caller
+ * can fall back.
+ */
+export function runtimeAverages(
+  jobs: Pick<Job, 'state' | 'runtime' | 'env' | 'ref'>[],
+): RuntimeAverages {
+  const samples: Record<JobClass, number[]> = { full: [], normal: [], skip: [] };
+  for (const job of jobs) {
+    const runtime = job.runtime ?? 0;
+    if (job.state !== 'passed' || runtime <= 0) continue;
+    samples[jobClass(job)].push(runtime);
+  }
+
+  const averages: RuntimeAverages = {};
+  for (const cls of Object.keys(samples) as JobClass[]) {
+    const values = samples[cls];
+    if (values.length) averages[cls] = median(values);
+  }
+  return averages;
+}
+
+/**
+ * Estimated total runtime (seconds) of a job: the average measured for its
+ * class in the loaded jobs, or the fallback when we have no sample yet.
+ */
+export function estimatedRuntime(
+  job: Pick<Job, 'env' | 'ref'>,
+  averages?: RuntimeAverages,
+): number {
+  const cls = jobClass(job);
+  const measured = averages?.[cls];
+  return measured && measured > 0 ? measured : FALLBACK_RUNTIME[cls];
 }
 
 /** Remaining runtime (seconds): the live `status.eta` while running, else the estimate. */
-function remainingRuntime(job: QueueJob, now: number): number {
+function remainingRuntime(job: QueueJob, now: number, averages?: RuntimeAverages): number {
   if (job.state === 'running') {
     const eta = job.status?.eta;
     if (eta != null) return Math.max(0, eta);
     const start = jobStartDate(job);
-    if (start) return Math.max(0, estimatedRuntime(job) - (now - start.getTime()) / 1000);
+    if (start) return Math.max(0, estimatedRuntime(job, averages) - (now - start.getTime()) / 1000);
   }
-  return estimatedRuntime(job);
+  return estimatedRuntime(job, averages);
+}
+
+/** Shared inputs for the queue/timeline estimates. */
+export interface EstimateOptions {
+  /** Reference time in milliseconds; defaults to now. */
+  now?: number;
+  /** Measured runtimes per class, from the loaded jobs. */
+  averages?: RuntimeAverages;
 }
 
 /**
@@ -284,12 +343,17 @@ function remainingRuntime(job: QueueJob, now: number): number {
  * it (a fasttracked job jumps the queue). The queued jobs then follow in
  * creation order, each contributing its estimated runtime. Keyed by uid.
  */
-export function estimateQueuedStarts(jobs: QueueJob[], now: number = Date.now()): Map<string, number> {
+export function estimateQueuedStarts(
+  jobs: QueueJob[],
+  options: EstimateOptions = {},
+): Map<string, number> {
+  const { averages } = options;
+  const now = options.now ?? Date.now();
   const starts = new Map<string, number>();
 
   let cursor = now;
   for (const job of jobs) {
-    if (job.state === 'running') cursor += remainingRuntime(job, now) * 1000;
+    if (job.state === 'running') cursor += remainingRuntime(job, now, averages) * 1000;
   }
 
   const queued = jobs
@@ -298,7 +362,7 @@ export function estimateQueuedStarts(jobs: QueueJob[], now: number = Date.now())
 
   for (const job of queued) {
     starts.set(job.uid, cursor);
-    cursor += remainingRuntime(job, now) * 1000;
+    cursor += remainingRuntime(job, now, averages) * 1000;
   }
 
   return starts;
@@ -322,8 +386,13 @@ interface Interval {
  * Each segment is `{ start, end, seconds, idle, future, uid?, state? }` with
  * `start`/`end` in milliseconds and `seconds` as the duration.
  */
-export function activeTimeTimeline(jobs: QueueJob[], now: number = Date.now()): TimelineSegment[] {
-  const queuedStarts = estimateQueuedStarts(jobs, now);
+export function activeTimeTimeline(
+  jobs: QueueJob[],
+  options: EstimateOptions = {},
+): TimelineSegment[] {
+  const { averages } = options;
+  const now = options.now ?? Date.now();
+  const queuedStarts = estimateQueuedStarts(jobs, { now, averages });
   const intervals: Interval[] = [];
 
   for (const job of jobs) {
@@ -335,7 +404,7 @@ export function activeTimeTimeline(jobs: QueueJob[], now: number = Date.now()): 
         state: job.state,
         future: true,
         start,
-        end: start + estimatedRuntime(job) * 1000,
+        end: start + estimatedRuntime(job, averages) * 1000,
       });
     } else if (job.state === 'running') {
       const start = jobStartDate(job);

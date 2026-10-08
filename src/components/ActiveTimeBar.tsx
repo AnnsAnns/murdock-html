@@ -2,7 +2,7 @@ import type { JobState, QueueJob, TimelineSegment } from '../types';
 import { Link } from 'react-router-dom';
 import styles from './ActiveTimeBar.module.css';
 import { preciseDuration } from '../utils/format';
-import { activeTimeTimeline } from '../utils/job';
+import { activeTimeTimeline, type RuntimeAverages } from '../utils/job';
 import { stateLabel } from '../utils/state';
 
 /**
@@ -16,10 +16,12 @@ interface ActiveTimeBarProps {
   jobs: QueueJob[];
   now?: number;
   refreshing?: boolean;
+  /** Measured runtimes per job class, used for the queued estimates. */
+  averages?: RuntimeAverages;
 }
 
-export function ActiveTimeBar({ jobs, now, refreshing = false }: ActiveTimeBarProps) {
-  const segments = activeTimeTimeline(jobs, now);
+export function ActiveTimeBar({ jobs, now, refreshing = false, averages }: ActiveTimeBarProps) {
+  const segments = activeTimeTimeline(jobs, { now, averages });
   if (!segments.length) return null;
 
   const sum = (predicate: (seg: TimelineSegment) => boolean): number =>

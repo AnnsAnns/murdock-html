@@ -6,6 +6,7 @@ import {
   estimatedRuntime,
   isMergeQueue,
   isNightly,
+  jobClass,
   jobEnd,
   jobLabels,
   jobMatchesSearch,
@@ -14,6 +15,7 @@ import {
   jobTitleUrl,
   prState,
   refRepr,
+  runtimeAverages,
 } from './job';
 import type { Job, QueueJob } from '../types';
 
@@ -150,6 +152,78 @@ describe('jobEnd', () => {
   });
 });
 
+describe('jobClass', () => {
+  it('groups everything that builds the whole tree as full', () => {
+    expect(jobClass({ env: { CI_PULL_LABELS: 'CI: full build' } })).toBe('full');
+    expect(jobClass({ ref: 'refs/heads/gh-readonly-queue/master/pr-1' })).toBe('full');
+    expect(jobClass({ ref: 'refs/heads/master', env: { NIGHTLY: '1' } })).toBe('full');
+    expect(jobClass({ ref: 'refs/tags/v1' })).toBe('full');
+  });
+
+  it('separates plain PRs from skip-compile-test PRs', () => {
+    expect(jobClass({ env: { CI_PULL_LABELS: 'CI: ready for build' } })).toBe('normal');
+    expect(jobClass({ env: { CI_PULL_LABELS: 'CI: ready for build;CI: skip compile test' } })).toBe(
+      'skip',
+    );
+  });
+
+  it('lets a full build win over skip compile test', () => {
+    expect(jobClass({ env: { CI_PULL_LABELS: 'CI: full build;CI: skip compile test' } })).toBe(
+      'full',
+    );
+  });
+});
+
+describe('runtimeAverages', () => {
+  const job = (overrides: Partial<Job>): Job => ({
+    uid: 'x',
+    state: 'passed',
+    commit: { sha: 'a', message: 'm', author: 'a' },
+    ...overrides,
+  });
+
+  it('takes the median of the successful runs per class', () => {
+    const averages = runtimeAverages([
+      job({ runtime: 100, env: { CI_PULL_LABELS: 'CI: ready for build' } }),
+      job({ runtime: 200, env: { CI_PULL_LABELS: 'CI: ready for build' } }),
+      job({ runtime: 1000, env: { CI_PULL_LABELS: 'CI: ready for build' } }),
+      job({ runtime: 7000, ref: 'refs/heads/master', env: { NIGHTLY: '1' } }),
+      job({ runtime: 9000, ref: 'refs/heads/master', env: { NIGHTLY: '1' } }),
+      job({ runtime: 180, env: { CI_PULL_LABELS: 'CI: skip compile test' } }),
+    ]);
+    expect(averages.normal).toBe(200);
+    expect(averages.full).toBe(8000);
+    expect(averages.skip).toBe(180);
+  });
+
+  it('is not dragged down by one unusually short passing run', () => {
+    const averages = runtimeAverages([
+      job({ runtime: 102, ref: 'refs/heads/master', env: { NIGHTLY: '1' } }),
+      job({ runtime: 6600, ref: 'refs/heads/master', env: { NIGHTLY: '1' } }),
+      job({ runtime: 6800, ref: 'refs/heads/master', env: { NIGHTLY: '1' } }),
+    ]);
+    expect(averages.full).toBe(6600);
+  });
+
+  it('averages the middle pair for an even number of samples', () => {
+    const averages = runtimeAverages([
+      job({ runtime: 100, env: { CI_PULL_LABELS: 'CI: ready for build' } }),
+      job({ runtime: 300, env: { CI_PULL_LABELS: 'CI: ready for build' } }),
+    ]);
+    expect(averages.normal).toBe(200);
+  });
+
+  it('ignores unfinished, failed, cancelled and zero-runtime jobs', () => {
+    const averages = runtimeAverages([
+      job({ state: 'running', runtime: 0 }),
+      job({ state: 'errored', runtime: 12 }),
+      job({ state: 'stopped', runtime: 500 }),
+      job({ runtime: 0 }),
+    ]);
+    expect(averages).toEqual({});
+  });
+});
+
 describe('estimatedRuntime', () => {
   it('is short for skip-compile-test jobs', () => {
     expect(estimatedRuntime({ env: { CI_PULL_LABELS: 'CI: ready for build;CI: skip compile test' } })).toBe(
@@ -181,6 +255,18 @@ describe('estimatedRuntime', () => {
   it('defaults to a normal build', () => {
     expect(estimatedRuntime({ env: { CI_PULL_LABELS: 'CI: ready for build' } })).toBe(900);
   });
+
+  it('prefers the measured average for the job class', () => {
+    expect(
+      estimatedRuntime({ env: { CI_PULL_LABELS: 'CI: ready for build' } }, { normal: 500 }),
+    ).toBe(500);
+  });
+
+  it('falls back per class when that class has no sample', () => {
+    expect(
+      estimatedRuntime({ env: { CI_PULL_LABELS: 'CI: ready for build' } }, { full: 5000 }),
+    ).toBe(900);
+  });
 });
 
 describe('estimateQueuedStarts', () => {
@@ -189,7 +275,7 @@ describe('estimateQueuedStarts', () => {
   it('starts the first queued job when the running job finishes', () => {
     const running: QueueJob = { uid: 'r', state: 'running', creation_time: 1, status: { eta: 60 } };
     const queued: QueueJob = { uid: 'q', state: 'queued', creation_time: 2 };
-    const starts = estimateQueuedStarts([queued, running], now);
+    const starts = estimateQueuedStarts([queued, running], { now });
     expect(starts.get('q')).toBe(now + 60 * 1000);
   });
 
@@ -207,7 +293,7 @@ describe('estimateQueuedStarts', () => {
       creation_time: 3,
       ref: 'refs/heads/gh-readonly-queue/master/pr-1',
     };
-    const starts = estimateQueuedStarts([full, skip, running], now);
+    const starts = estimateQueuedStarts([full, skip, running], { now });
     expect(starts.get('a')).toBe(now + 30 * 1000);
     expect(starts.get('b')).toBe(now + (30 + 180) * 1000);
   });
@@ -216,7 +302,7 @@ describe('estimateQueuedStarts', () => {
     const startedAt = now / 1000 - 60;
     const running: QueueJob = { uid: 'r', state: 'running', creation_time: 1, start_time: startedAt };
     const queued: QueueJob = { uid: 'q', state: 'queued', creation_time: 2 };
-    const starts = estimateQueuedStarts([running, queued], now);
+    const starts = estimateQueuedStarts([running, queued], { now });
     expect(starts.get('q')).toBe(now + (900 - 60) * 1000);
   });
 
@@ -225,20 +311,29 @@ describe('estimateQueuedStarts', () => {
     // job still holds the worker, so the queue starts after it finishes.
     const queued: QueueJob = { uid: 'q', state: 'queued', creation_time: 1 };
     const running: QueueJob = { uid: 'r', state: 'running', creation_time: 2, status: { eta: 60 } };
-    const starts = estimateQueuedStarts([queued, running], now);
+    const starts = estimateQueuedStarts([queued, running], { now });
     expect(starts.get('q')).toBe(now + 60 * 1000);
   });
 
   it('orders the queued jobs by creation time', () => {
     const first: QueueJob = { uid: 'first', state: 'queued', creation_time: 1 };
     const second: QueueJob = { uid: 'second', state: 'queued', creation_time: 2 };
-    const starts = estimateQueuedStarts([second, first], now);
+    const starts = estimateQueuedStarts([second, first], { now });
     expect(starts.get('first')).toBe(now);
     expect(starts.get('second')).toBe(now + 900 * 1000);
   });
 
+  it('uses the measured averages for the queued runtimes', () => {
+    const labels = { CI_PULL_LABELS: 'CI: ready for build' };
+    const first: QueueJob = { uid: 'first', state: 'queued', creation_time: 1, env: labels };
+    const second: QueueJob = { uid: 'second', state: 'queued', creation_time: 2, env: labels };
+    const starts = estimateQueuedStarts([first, second], { now, averages: { normal: 60 } });
+    expect(starts.get('first')).toBe(now);
+    expect(starts.get('second')).toBe(now + 60 * 1000);
+  });
+
   it('ignores jobs that are neither running nor queued', () => {
-    const starts = estimateQueuedStarts([{ uid: 'p', state: 'passed', creation_time: 1 }], now);
+    const starts = estimateQueuedStarts([{ uid: 'p', state: 'passed', creation_time: 1 }], { now });
     expect(starts.size).toBe(0);
   });
 });
@@ -252,7 +347,7 @@ describe('activeTimeTimeline', () => {
         { uid: 'b', state: 'errored', start_time: 900, runtime: 100 },
         { uid: 'a', state: 'passed', start_time: 800, runtime: 60 },
       ],
-      now,
+      { now },
     );
 
     expect(segments.map((seg) => (seg.idle ? 'idle' : seg.uid))).toEqual(['a', 'idle', 'b']);
@@ -270,7 +365,7 @@ describe('activeTimeTimeline', () => {
           status: { eta: 50 },
         },
       ],
-      now,
+      { now },
     );
 
     expect(segments).toHaveLength(2);
@@ -281,7 +376,7 @@ describe('activeTimeTimeline', () => {
   it('appends queued jobs as the future', () => {
     const segments = activeTimeTimeline(
       [{ uid: 'q', state: 'queued', env: { CI_PULL_LABELS: 'CI: skip compile test' } }],
-      now,
+      { now },
     );
 
     expect(segments).toHaveLength(1);
