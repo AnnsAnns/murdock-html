@@ -170,11 +170,15 @@ export interface JobEnd {
   estimated: boolean;
 }
 
+/** The kind of external reference a ref link points at. */
+export type RefLinkKind = 'pr' | 'merge-queue' | 'branch' | 'tag' | 'commit';
+
 export interface RefLink {
   url: string;
   label: string;
   title: string;
   icon: IconName;
+  kind: RefLinkKind;
 }
 
 /** The loose subset of a job needed to derive its external reference link. */

@@ -51,6 +51,13 @@
   --terminal-background: #15131a;
   --terminal-text: #f2cb9b;
 
+  /* Ref labels: each kind of external reference gets its own colour. */
+  --ref-pr: #1c7a5c;
+  --ref-merge-queue: #a9600f;
+  --ref-branch: #7a3fbf;
+  --ref-tag: #356f9e;
+  --ref-commit: #6b6470;
+
   /* Let native controls and scrollbars follow the active scheme. */
   color-scheme: light dark;
 
@@ -73,6 +80,13 @@
     --border: color-mix(in srgb, var(--base-text-color) 18%, transparent);
     --focus-color: #57c8a2;
     --link-color: #e8a08a;
+
+    /* Ref labels need lighter inks to stay readable on the dark cards. */
+    --ref-pr: #5fcfaa;
+    --ref-merge-queue: #e0ac6a;
+    --ref-branch: #c4a0f0;
+    --ref-tag: #8fbcdd;
+    --ref-commit: #b0a9b5;
   }
 }
 

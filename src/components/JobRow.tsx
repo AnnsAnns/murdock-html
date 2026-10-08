@@ -136,6 +136,7 @@ export function JobRow({
             target="_blank"
             rel="noreferrer noopener"
             title={refLink.title}
+            data-kind={refLink.kind}
             onClick={(event) => event.stopPropagation()}
           >
             <Icon name={refLink.icon} size={13} />

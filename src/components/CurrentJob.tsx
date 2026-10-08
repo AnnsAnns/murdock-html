@@ -70,6 +70,7 @@ export function CurrentJob({ job, canManage, onAction, expanded, onToggle }: Cur
             target="_blank"
             rel="noreferrer noopener"
             title={refLink.title}
+            data-kind={refLink.kind}
           >
             <Icon name={refLink.icon} size={13} />
             <span>{refLink.label}</span>

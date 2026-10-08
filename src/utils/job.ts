@@ -103,6 +103,7 @@ export function jobRefLink(
       label: `PR #${job.prinfo.number}`,
       title: job.prinfo.title ?? `Pull request #${job.prinfo.number}`,
       icon: 'gitPullRequest',
+      kind: 'pr',
     };
   }
 
@@ -113,6 +114,7 @@ export function jobRefLink(
       label: `PR #${pullNr}`,
       title: `Pull request #${pullNr}`,
       icon: 'gitPullRequest',
+      kind: 'pr',
     };
   }
 
@@ -123,6 +125,7 @@ export function jobRefLink(
       label: 'Merge queue',
       title: `Merge queue for ${branch}`,
       icon: 'gitMerge',
+      kind: 'merge-queue',
     };
   }
 
@@ -133,6 +136,7 @@ export function jobRefLink(
       label: branch,
       title: `Branch ${branch}`,
       icon: 'gitBranch',
+      kind: 'branch',
     };
   }
 
@@ -143,6 +147,7 @@ export function jobRefLink(
       label: tag,
       title: `Tag ${tag}`,
       icon: 'tag',
+      kind: 'tag',
     };
   }
 
@@ -152,6 +157,7 @@ export function jobRefLink(
       label: 'commit',
       title: `Commit ${job.commit.sha}`,
       icon: 'gitCommit',
+      kind: 'commit',
     };
   }
 

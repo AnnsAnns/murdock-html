@@ -169,7 +169,10 @@
   }
 }
 
-/* A labelled link that clearly redirects off-site (PR, merge queue, branch). */
+/* A labelled link that clearly redirects off-site (PR, merge queue, branch).
+   Each kind of reference gets its own colour so they are told apart at a
+   glance: pull requests, the merge queue, branches (e.g. master), tags and
+   bare commits. */
 .refLink {
   display: inline-flex;
   align-items: center;
@@ -177,14 +180,30 @@
   flex: 0 0 auto;
   padding: 1px 7px;
   border-radius: var(--radius);
-  background: color-mix(in srgb, var(--box-color-standard) 22%, transparent);
-  color: inherit;
+  background: color-mix(in srgb, var(--ref-color, var(--box-color-standard)) 18%, transparent);
+  color: var(--ref-color, inherit);
   font-size: 12px;
   white-space: nowrap;
 
   &:hover {
     text-decoration: none;
-    background: color-mix(in srgb, var(--box-color-standard) 36%, transparent);
+    background: color-mix(in srgb, var(--ref-color, var(--box-color-standard)) 32%, transparent);
+  }
+
+  &[data-kind='pr'] {
+    --ref-color: var(--ref-pr);
+  }
+  &[data-kind='merge-queue'] {
+    --ref-color: var(--ref-merge-queue);
+  }
+  &[data-kind='branch'] {
+    --ref-color: var(--ref-branch);
+  }
+  &[data-kind='tag'] {
+    --ref-color: var(--ref-tag);
+  }
+  &[data-kind='commit'] {
+    --ref-color: var(--ref-commit);
   }
 }
 /* ============================================================

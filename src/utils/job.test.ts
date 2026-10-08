@@ -229,6 +229,7 @@ describe('jobRefLink', () => {
       label: 'PR #1',
       title: 'Fix it',
       icon: 'gitPullRequest',
+      kind: 'pr',
     });
   });
 
@@ -237,6 +238,7 @@ describe('jobRefLink', () => {
     expect(link?.url).toBe('https://github.com/RIOT-OS/RIOT/pull/42');
     expect(link?.label).toBe('PR #42');
     expect(link?.icon).toBe('gitPullRequest');
+    expect(link?.kind).toBe('pr');
   });
 
   it('links merge-queue jobs to the merge queue', () => {
@@ -244,14 +246,20 @@ describe('jobRefLink', () => {
     expect(link?.url).toBe('https://github.com/RIOT-OS/RIOT/queue/master');
     expect(link?.label).toBe('Merge queue');
     expect(link?.icon).toBe('gitMerge');
+    expect(link?.kind).toBe('merge-queue');
   });
 
   it('links branch and tag refs', () => {
     expect(jobRefLink({ ref: 'refs/heads/master' }, 'R/R')).toMatchObject({
       url: 'https://github.com/R/R/tree/master',
       icon: 'gitBranch',
+      kind: 'branch',
     });
-    expect(jobRefLink({ ref: 'refs/tags/v1' }, 'R/R')).toMatchObject({ label: 'v1', icon: 'tag' });
+    expect(jobRefLink({ ref: 'refs/tags/v1' }, 'R/R')).toMatchObject({
+      label: 'v1',
+      icon: 'tag',
+      kind: 'tag',
+    });
   });
 
   it('falls back to the commit', () => {
@@ -259,5 +267,6 @@ describe('jobRefLink', () => {
     expect(link?.url).toBe('https://github.com/R/R/commit/abc123');
     expect(link?.label).toBe('commit');
     expect(link?.icon).toBe('gitCommit');
+    expect(link?.kind).toBe('commit');
   });
 });
