@@ -17,10 +17,13 @@ const job: Job = {
   status: {},
 };
 
-function renderList(props: Pick<ComponentProps<typeof JobList>, 'canManage' | 'onAction'>) {
+function renderList(
+  props: Pick<ComponentProps<typeof JobList>, 'canManage' | 'onAction'> & { jobs?: Job[] },
+) {
+  const { jobs = [job], ...rest } = props;
   return render(
     <MemoryRouter>
-      <JobList jobs={[job]} queuedStarts={new Map()} {...props} />
+      <JobList jobs={jobs} queuedStarts={new Map()} {...rest} />
     </MemoryRouter>,
   );
 }
@@ -42,5 +45,22 @@ describe('JobList', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Job actions' }));
     expect(screen.getByRole('link', { name: /Open full page/ })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Restart' })).not.toBeInTheDocument();
+  });
+
+  it('marks a PR ref link with its GitHub state', () => {
+    const merged: Job = {
+      ...job,
+      prinfo: {
+        number: 7,
+        url: 'https://github.com/x/y/pull/7',
+        state: 'closed',
+        is_merged: true,
+      },
+    };
+    renderList({ jobs: [merged], canManage: false, onAction: () => {} });
+
+    const link = screen.getByRole('link', { name: /PR #7/ });
+    expect(link).toHaveAttribute('data-kind', 'pr');
+    expect(link).toHaveAttribute('data-pr-state', 'merged');
   });
 });

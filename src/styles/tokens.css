@@ -84,11 +84,18 @@
   --terminal-text: #f2cb9b;
 
   /* Ref labels: each kind of external reference gets its own colour. */
-  --ref-pr: #1c7a5c;
-  --ref-merge-queue: #a9600f;
-  --ref-branch: #7a3fbf;
-  --ref-tag: #356f9e;
-  --ref-commit: #6b6470;
+  --ref-pr: #2563eb;
+  --ref-merge-queue: #ea580c;
+  --ref-branch: #0d9488;
+  --ref-tag: #a16207;
+  --ref-commit: #64748b;
+
+  /* PR state badge (icon fill) and the ink drawn on top of it. "Open" is a
+     cyan so it is not mistaken for the green "passed" job state. */
+  --pr-open: #0e7490;
+  --pr-closed: #b91c1c;
+  --pr-merged: #7c3aed;
+  --pr-badge-ink: #ffffff;
 
   /* Let native controls and scrollbars follow the active scheme. */
   color-scheme: light dark;
@@ -114,11 +121,16 @@
     --link-color: #e8a08a;
 
     /* Ref labels need lighter inks to stay readable on the dark cards. */
-    --ref-pr: #5fcfaa;
-    --ref-merge-queue: #e0ac6a;
-    --ref-branch: #c4a0f0;
-    --ref-tag: #8fbcdd;
-    --ref-commit: #b0a9b5;
+    --ref-pr: #8ab4f8;
+    --ref-merge-queue: #fb923c;
+    --ref-branch: #5eead4;
+    --ref-tag: #facc15;
+    --ref-commit: #a8b0bd;
+
+    --pr-open: #67e8f9;
+    --pr-closed: #f87171;
+    --pr-merged: #c4a0f0;
+    --pr-badge-ink: #16151a;
   }
 }
 

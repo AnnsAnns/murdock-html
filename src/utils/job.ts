@@ -2,12 +2,14 @@
 
 import type {
   BuildProgress,
+  IconName,
   Job,
   JobEnd,
   JobRefSource,
   JobState,
   JobStatus,
   PrInfo,
+  PrState,
   QueueJob,
   RefLink,
   TimelineSegment,
@@ -91,6 +93,22 @@ export function prStateColor(prinfo: PrInfo | null | undefined): string | null {
   return null;
 }
 
+/** PR lifecycle state, or undefined when GitHub did not report one. */
+export function prState(prinfo: PrInfo | null | undefined): PrState | undefined {
+  if (!prinfo) return undefined;
+  if (prinfo.is_merged) return 'merged';
+  if (prinfo.state === 'closed') return 'closed';
+  if (prinfo.state === 'open') return 'open';
+  return undefined;
+}
+
+/** Icon shown in the PR ref badge, by lifecycle state. */
+const PR_ICONS: Record<PrState, IconName> = {
+  open: 'gitPullRequest',
+  closed: 'gitPullRequestClosed',
+  merged: 'gitMerge',
+};
+
 /** Live build progress, or null when the counters are not yet meaningful. */
 export function buildProgress(status: JobStatus | null | undefined): BuildProgress | null {
   if (!status) return null;
@@ -124,12 +142,14 @@ export function jobRefLink(
   repo: string,
 ): RefLink | null {
   if (job.prinfo?.url) {
+    const state = prState(job.prinfo);
     return {
       url: job.prinfo.url,
       label: `PR #${job.prinfo.number}`,
       title: job.prinfo.title ?? `Pull request #${job.prinfo.number}`,
-      icon: 'gitPullRequest',
+      icon: state ? PR_ICONS[state] : 'gitPullRequest',
       kind: 'pr',
+      prState: state,
     };
   }
 

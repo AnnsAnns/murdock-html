@@ -41,6 +41,7 @@ export type IconName =
   | 'moon'
   | 'play'
   | 'gitPullRequest'
+  | 'gitPullRequestClosed'
   | 'gitMerge'
   | 'gitBranch'
   | 'gitCommit';
@@ -174,12 +175,17 @@ export interface JobEnd {
 /** The kind of external reference a ref link points at. */
 export type RefLinkKind = 'pr' | 'merge-queue' | 'branch' | 'tag' | 'commit';
 
+/** GitHub pull-request lifecycle state, used to ring a PR ref label. */
+export type PrState = 'open' | 'closed' | 'merged';
+
 export interface RefLink {
   url: string;
   label: string;
   title: string;
   icon: IconName;
   kind: RefLinkKind;
+  /** Set for PR links whose GitHub state is known. */
+  prState?: PrState;
 }
 
 /** The loose subset of a job needed to derive its external reference link. */

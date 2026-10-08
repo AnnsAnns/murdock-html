@@ -192,6 +192,25 @@
 
   &[data-kind='pr'] {
     --ref-color: var(--ref-pr);
+
+    /* The icon sits in a badge coloured by the PR's GitHub state. */
+    &[data-pr-state='open'] {
+      --pr-state-color: var(--pr-open);
+    }
+    &[data-pr-state='closed'] {
+      --pr-state-color: var(--pr-closed);
+    }
+    &[data-pr-state='merged'] {
+      --pr-state-color: var(--pr-merged);
+    }
+
+    &[data-pr-state] svg {
+      box-sizing: content-box;
+      padding: 3px;
+      border-radius: 50%;
+      background: var(--pr-state-color);
+      color: var(--pr-badge-ink);
+    }
   }
   &[data-kind='merge-queue'] {
     --ref-color: var(--ref-merge-queue);

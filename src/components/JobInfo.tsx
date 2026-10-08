@@ -46,6 +46,7 @@ export function JobInfo({ job }: JobInfoProps) {
             rel="noreferrer noopener"
             title={refLink.title}
             data-kind={refLink.kind}
+            data-pr-state={refLink.prState}
           >
             <Icon name={refLink.icon} size={13} />
             <span>{refLink.label}</span>

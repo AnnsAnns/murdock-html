@@ -137,6 +137,7 @@ export function JobRow({
             rel="noreferrer noopener"
             title={refLink.title}
             data-kind={refLink.kind}
+            data-pr-state={refLink.prState}
             onClick={(event) => event.stopPropagation()}
           >
             <Icon name={refLink.icon} size={13} />

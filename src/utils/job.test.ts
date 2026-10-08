@@ -12,6 +12,7 @@ import {
   jobRefLink,
   jobStartDate,
   jobTitleUrl,
+  prState,
   refRepr,
 } from './job';
 import type { Job, QueueJob } from '../types';
@@ -261,6 +262,16 @@ describe('activeTimeTimeline', () => {
   });
 });
 
+describe('prState', () => {
+  it('maps the GitHub pull-request state', () => {
+    expect(prState({ number: 1, state: 'open' })).toBe('open');
+    expect(prState({ number: 1, state: 'closed' })).toBe('closed');
+    expect(prState({ number: 1, state: 'closed', is_merged: true })).toBe('merged');
+    expect(prState({ number: 1 })).toBeUndefined();
+    expect(prState(undefined)).toBeUndefined();
+  });
+});
+
 describe('jobRefLink', () => {
   it('links a PR job to its pull request', () => {
     const link = jobRefLink(
@@ -274,6 +285,25 @@ describe('jobRefLink', () => {
       icon: 'gitPullRequest',
       kind: 'pr',
     });
+  });
+
+  it('carries the PR state for the label ring', () => {
+    const link = jobRefLink(
+      { prinfo: { number: 2, url: 'https://github.com/x/y/pull/2', state: 'open' } },
+      'RIOT-OS/RIOT',
+    );
+    expect(link?.prState).toBe('open');
+  });
+
+  it('picks the badge icon from the PR state', () => {
+    const pr = { url: 'https://github.com/x/y/pull/1', number: 1 };
+    const icon = (prinfo: Parameters<typeof jobRefLink>[0]['prinfo']) =>
+      jobRefLink({ prinfo }, 'RIOT-OS/RIOT')?.icon;
+
+    expect(icon({ ...pr, state: 'open' })).toBe('gitPullRequest');
+    expect(icon({ ...pr, state: 'closed' })).toBe('gitPullRequestClosed');
+    expect(icon({ ...pr, state: 'closed', is_merged: true })).toBe('gitMerge');
+    expect(icon(pr)).toBe('gitPullRequest');
   });
 
   it('falls back to env.CI_PULL_NR', () => {
