@@ -24,9 +24,9 @@ export interface JobFiltersProps {
   params: QueryParams;
   draft: DraftParams;
   onType: (type: JobType) => void;
-  /** Toggle a state's exclusion (a hidden state is filtered out). */
-  onToggleHiddenState: (state: JobState) => void;
-  onClearStates: () => void;
+  /** Toggle a state's inclusion in the query. */
+  onToggleState: (state: JobState) => void;
+  onSelectAllStates: () => void;
   /** Toggle an excluded PR state (`open` / `closed`). */
   onToggleHiddenPrState: (key: 'open' | 'closed') => void;
   /** Toggle a PR label (client-side, matches any selected label). */
@@ -44,8 +44,8 @@ export function JobFilters({
   params,
   draft,
   onType,
-  onToggleHiddenState,
-  onClearStates,
+  onToggleState,
+  onSelectAllStates,
   onToggleHiddenPrState,
   onToggleLabel,
   onClearLabels,
@@ -68,10 +68,9 @@ export function JobFilters({
   };
 
   const inputClass = `${controls.input} ${filters.filterInput}`;
-  // State filters are inverted: a selected state is one to hide, so by default
-  // nothing is selected and every state is shown.
-  const hiddenCount = STATES.length - params.states.length;
-  const noneHidden = hiddenCount === 0;
+  // States are selected positively: the query carries exactly the states shown,
+  // and "All" simply selects every one of them.
+  const allSelected = params.states.length === STATES.length;
 
   return (
     <section id="job-filters" className={box.box}>
@@ -118,36 +117,44 @@ export function JobFilters({
 
         <div className={filters.filterSection}>
           <div className={filters.sectionHead}>
-            <span className={filters.filterLabel}>Hide states</span>
+            <span className={filters.filterLabel}>States</span>
             <span className={filters.stateSummary}>
-              <span>{noneHidden ? 'All states shown' : `${hiddenCount} hidden`}</span>
-              {!noneHidden && (
-                <button type="button" className={filters.selectAll} onClick={onClearStates}>
-                  Show all
+              <span>
+                {allSelected ? 'All shown' : `${params.states.length} of ${STATES.length} shown`}
+              </span>
+              {!allSelected && (
+                <button
+                  type="button"
+                  className={filters.selectAll}
+                  aria-label="Reset states"
+                  title="Show every state again"
+                  onClick={onSelectAllStates}
+                >
+                  Reset
                 </button>
               )}
             </span>
           </div>
-          <div className={filters.stateList} role="group" aria-label="Hide job states">
+          <div className={filters.stateList} role="group" aria-label="Job states">
             {STATES.map((state) => {
-              const hidden = !params.states.includes(state);
+              const selected = params.states.includes(state);
               return (
                 <button
                   key={state}
                   type="button"
-                  className={`${filters.stateRow} ${hidden ? filters.isOn : ''}`}
+                  className={`${filters.stateRow} ${selected ? filters.isOn : ''}`}
                   data-state={state}
-                  aria-pressed={hidden}
-                  title={`${hidden ? 'Show' : 'Hide'} ${stateLabel(state).toLowerCase()} jobs`}
-                  onClick={() => onToggleHiddenState(state)}
+                  aria-pressed={selected}
+                  title={`${selected ? 'Hide' : 'Show'} ${stateLabel(state).toLowerCase()} jobs`}
+                  onClick={() => onToggleState(state)}
                 >
                   <span className={filters.checkbox} aria-hidden="true">
-                    {hidden && <Icon name="check" size={12} />}
+                    {selected && <Icon name="check" size={12} />}
                   </span>
                   <span className={filters.stateIcon}>
                     <Icon name={stateIcon(state)} size={15} />
                   </span>
-                  <span className={filters.stateName}>No {stateLabel(state)}</span>
+                  <span className={filters.stateName}>{stateLabel(state)}</span>
                 </button>
               );
             })}

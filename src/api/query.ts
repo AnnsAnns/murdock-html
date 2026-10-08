@@ -117,11 +117,14 @@ export function queryStringToQueryParams(queryString: string): QueryParams {
       case 'type':
         if ((JOB_TYPES as readonly string[]).includes(value)) params.type = value as JobType;
         break;
-      case 'states':
-        params.states = value
+      case 'states': {
+        const states = value
           .split(' ')
           .filter((state): state is JobState => (STATES as readonly string[]).includes(state));
+        // An empty selection would ask the API for nothing, so keep the default.
+        if (states.length) params.states = states;
         break;
+      }
       case 'prstates':
         params.prstates.open = value.includes('open');
         params.prstates.closed = value.includes('closed');

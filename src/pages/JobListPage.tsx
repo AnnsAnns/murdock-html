@@ -154,14 +154,18 @@ export function JobListPage() {
   );
 
   const onType = (type: JobType) => update({ type });
-  // Inverted filters: a hidden state is one removed from the API's included
-  // `states` list.
-  const onToggleHiddenState = (state: JobState) =>
+  // States are selected positively. The list never goes empty: at least one
+  // has to stay selected, and the order is kept canonical for the URL.
+  const onToggleState = (state: JobState) => {
+    const selected = params.states.includes(state);
+    if (selected && params.states.length === 1) return;
     update({
-      states: params.states.includes(state)
+      states: selected
         ? params.states.filter((entry) => entry !== state)
-        : [...params.states, state],
+        : STATES.filter((entry) => entry === state || params.states.includes(entry)),
     });
+  };
+  const onSelectAllStates = () => update({ states: [...STATES] });
   const onToggleHiddenPrState = (key: 'open' | 'closed') =>
     update({ prstates: { ...params.prstates, [key]: !params.prstates[key] } });
   const onToggleLabel = (label: string) =>
@@ -171,9 +175,6 @@ export function JobListPage() {
         : [...params.labels, label],
     });
   const onClearLabels = () => update({ labels: [] });
-  // The state filters are inverted: "clear" removes every exclusion, showing
-  // all states again (the API still receives the included states).
-  const onClearStates = () => update({ states: [...STATES] });
   const onDraftChange = (field: keyof DraftParams, value: string) =>
     setDraft((current) => ({ ...current, [field]: value }));
   const onCommit = () => update(draft);
@@ -239,8 +240,8 @@ export function JobListPage() {
             params={params}
             draft={draft}
             onType={onType}
-            onToggleHiddenState={onToggleHiddenState}
-            onClearStates={onClearStates}
+            onToggleState={onToggleState}
+            onSelectAllStates={onSelectAllStates}
             onToggleHiddenPrState={onToggleHiddenPrState}
             onToggleLabel={onToggleLabel}
             onClearLabels={onClearLabels}

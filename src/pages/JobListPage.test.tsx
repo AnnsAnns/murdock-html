@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -64,9 +64,9 @@ function renderPage() {
 }
 
 /** The dashboard as the app mounts it, so the top-bar toggle is present. */
-function renderDashboard() {
+function renderDashboard(path = '/') {
   return render(
-    <MemoryRouter initialEntries={['/']}>
+    <MemoryRouter initialEntries={[path]}>
       <AuthProvider>
         <ToastProvider>
           <FiltersProvider>
@@ -311,6 +311,45 @@ describe('JobListPage', () => {
 
     const titles = (await screen.findAllByText(/master @ queued:/)).map((el) => el.textContent);
     expect(titles).toEqual(['master @ queued: older', 'master @ queued: newer']);
+  });
+
+  it('selects job states positively, with a reset', async () => {
+    renderDashboard();
+    await userEvent.click(await screen.findByRole('button', { name: 'Show Filters' }));
+
+    const states = within(screen.getByRole('group', { name: 'Job states' }));
+    expect(states.getByRole('button', { name: 'Success' })).toHaveAttribute('aria-pressed', 'true');
+
+    // Deselecting "Failed" drops errored from the API query.
+    await userEvent.click(states.getByRole('button', { name: 'Failed' }));
+    await waitFor(() =>
+      expect(
+        fetchMock.mock.calls.some(([url]) =>
+          String(url).includes('states=queued+running+passed+stopped'),
+        ),
+      ).toBe(true),
+    );
+
+    // Reset puts every state back.
+    await userEvent.click(screen.getByRole('button', { name: 'Reset states' }));
+    await waitFor(() =>
+      expect(
+        fetchMock.mock.calls.some(([url]) =>
+          String(url).includes('states=queued+running+passed+errored+stopped'),
+        ),
+      ).toBe(true),
+    );
+  });
+
+  it('never lets the state selection go empty', async () => {
+    renderDashboard('/?states=passed');
+    // The active-filter badge is part of the button's name here.
+    await userEvent.click(await screen.findByRole('button', { name: /Show Filters/ }));
+
+    const states = within(screen.getByRole('group', { name: 'Job states' }));
+    await userEvent.click(states.getByRole('button', { name: 'Success' }));
+
+    expect(states.getByRole('button', { name: 'Success' })).toHaveAttribute('aria-pressed', 'true');
   });
 
   it('shows the empty state when there are no jobs', async () => {
