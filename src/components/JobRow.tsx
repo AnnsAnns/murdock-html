@@ -4,13 +4,20 @@ import jobs from './JobRow.module.css';
 import progressStyles from './JobProgress.module.css';
 import {
   buildProgress,
+  estimatedRuntime,
   jobEnd,
   jobRefLink,
   jobStartDate,
   jobTitle,
   jobTooltip,
 } from '../utils/job';
-import { formatDayMonthTime, formatEta, preciseDuration, relativeTime } from '../utils/format';
+import {
+  compactDuration,
+  formatDayMonthTime,
+  formatEta,
+  preciseDuration,
+  relativeTime,
+} from '../utils/format';
 import { FINISHED_STATES } from '../utils/state';
 import { Icon } from './Icon';
 import { JobActions } from './JobActions';
@@ -60,6 +67,14 @@ function DurationCell({ job }: DurationCellProps) {
 
   if (FINISHED_STATES.includes(job.state)) {
     return <div className={jobs.jobDuration}>{preciseDuration(job.runtime ?? 0)}</div>;
+  }
+
+  if (job.state === 'queued') {
+    return (
+      <div className={jobs.jobDuration} title="Estimated from the job's CI flags">
+        <span className="muted">est.</span> {compactDuration(estimatedRuntime(job))}
+      </div>
+    );
   }
 
   return <div className={`${jobs.jobDuration} muted`}>-</div>;

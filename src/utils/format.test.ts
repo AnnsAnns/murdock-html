@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatDayMonthTime, formatEta, preciseDuration } from './format';
+import { compactDuration, formatDayMonthTime, formatEta, preciseDuration } from './format';
 
 describe('formatEta', () => {
   it('shows minutes for sub-2h ETAs instead of a rounded hour', () => {
@@ -51,5 +51,26 @@ describe('preciseDuration', () => {
 
   it('clamps negative input', () => {
     expect(preciseDuration(-5)).toBe('00s');
+  });
+});
+
+describe('compactDuration', () => {
+  it('formats seconds, minutes and hours compactly', () => {
+    expect(compactDuration(45)).toBe('45s');
+    expect(compactDuration(3 * 60)).toBe('3m');
+    expect(compactDuration(15 * 60)).toBe('15m');
+    expect(compactDuration(2 * 3600)).toBe('2h');
+  });
+
+  it('keeps the minutes for mixed hours', () => {
+    expect(compactDuration(2 * 3600 + 30 * 60)).toBe('2h 30m');
+  });
+
+  it('rounds up to the next unit at the boundary', () => {
+    expect(compactDuration(3599)).toBe('1h');
+  });
+
+  it('clamps negative input', () => {
+    expect(compactDuration(-5)).toBe('0s');
   });
 });

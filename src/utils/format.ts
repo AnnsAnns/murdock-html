@@ -42,6 +42,20 @@ export function formatEta(seconds: number): string {
 }
 
 /**
+ * Compact duration from a value in seconds: "45s", "15m", "2h", "2h 30m".
+ * Used for the estimated runtime of a queued job.
+ */
+export function compactDuration(value: number): string {
+  const total = Math.max(0, Math.round(value));
+  if (total < 60) return `${total}s`;
+  const totalMinutes = Math.round(total / 60);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if (hours > 0) return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+  return `${minutes}m`;
+}
+
+/**
  * Precise "1d 02h 03m 04s" duration from a value in seconds, matching the
  * original Murdock formatting.
  */

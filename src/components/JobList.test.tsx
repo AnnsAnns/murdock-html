@@ -47,6 +47,21 @@ describe('JobList', () => {
     expect(screen.queryByRole('button', { name: 'Restart' })).not.toBeInTheDocument();
   });
 
+  it('shows the estimated duration on a queued row', () => {
+    const queued: Job = { ...job, uid: 'queued', state: 'queued', start_time: 0 };
+    const nightly: Job = {
+      ...job,
+      uid: 'nightly',
+      state: 'queued',
+      start_time: 0,
+      env: { NIGHTLY: '1' },
+    };
+    renderList({ jobs: [queued, nightly], canManage: false, onAction: () => {} });
+
+    expect(screen.getByText('15m')).toHaveTextContent('est. 15m');
+    expect(screen.getByText('2h')).toHaveTextContent('est. 2h');
+  });
+
   it('marks a PR ref link with its GitHub state', () => {
     const merged: Job = {
       ...job,
