@@ -1,8 +1,9 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AuthProvider } from '../auth/AuthContext';
+import { ITEMS_DISPLAYED_STEP } from '../api/config';
 import { FiltersProvider } from '../components/FiltersContext';
 import { NavBar } from '../components/NavBar';
 import { ToastProvider } from '../components/Toast';
@@ -251,6 +252,37 @@ describe('JobListPage', () => {
 
     expect(await screen.findByText(/needle: found it/)).toBeInTheDocument();
     expect(screen.queryByText(/haystack: elsewhere/)).not.toBeInTheDocument();
+  });
+
+  it('confirms before loading more than the default page size', async () => {
+    const defaultSize = String(ITEMS_DISPLAYED_STEP);
+    const biggerSize = String(ITEMS_DISPLAYED_STEP * 3);
+
+    renderDashboard();
+    await userEvent.click(await screen.findByRole('button', { name: 'Show Filters' }));
+
+    // The default size applies straight away.
+    await userEvent.click(await screen.findByRole('button', { name: defaultSize }));
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+
+    // Any other size asks first.
+    await userEvent.click(screen.getByRole('button', { name: biggerSize }));
+    expect(await screen.findByRole('alertdialog')).toHaveTextContent('Load more jobs?');
+
+    await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
+    expect(fetchMock.mock.calls.some(([url]) => String(url).includes(`limit=${biggerSize}`))).toBe(
+      false,
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: biggerSize }));
+    await userEvent.click(await screen.findByRole('button', { name: 'Load' }));
+
+    await waitFor(() =>
+      expect(fetchMock.mock.calls.some(([url]) => String(url).includes(`limit=${biggerSize}`))).toBe(
+        true,
+      ),
+    );
   });
 
   it('shows the empty state when there are no jobs', async () => {

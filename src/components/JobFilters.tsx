@@ -1,11 +1,15 @@
-import type { KeyboardEvent } from 'react';
+import { useState, type KeyboardEvent } from 'react';
 import { JOB_TYPES, LABEL_OPTIONS, LIMIT_OPTIONS } from '../api/query';
 import box from '../styles/box.module.css';
 import controls from '../styles/controls.module.css';
 import filters from './JobFilters.module.css';
 import { STATES, stateIcon, stateLabel } from '../utils/state';
+import { ConfirmDialog } from './ConfirmDialog';
 import { Icon } from './Icon';
 import type { DraftParams, JobState, JobType, QueryParams } from '../types';
+
+/** The default page size, which is applied without confirmation. */
+const DEFAULT_LIMIT = LIMIT_OPTIONS[0];
 
 const TYPE_LABELS: Record<JobType, string> = {
   all: 'All',
@@ -50,8 +54,17 @@ export function JobFilters({
   onLimit,
   onReset,
 }: JobFiltersProps) {
+  const [pendingLimit, setPendingLimit] = useState<number | null>(null);
+
   const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') onCommit();
+  };
+
+  // Any size other than the default is confirmed first.
+  const chooseLimit = (option: number) => {
+    if (option === Number(params.limit)) return;
+    if (option === DEFAULT_LIMIT) onLimit(option);
+    else setPendingLimit(option);
   };
 
   const inputClass = `${controls.input} ${filters.filterInput}`;
@@ -282,7 +295,7 @@ export function JobFilters({
                 type="button"
                 className={Number(params.limit) === option ? filters.isOn : ''}
                 aria-pressed={Number(params.limit) === option}
-                onClick={() => onLimit(option)}
+                onClick={() => chooseLimit(option)}
               >
                 {option}
               </button>
@@ -304,6 +317,19 @@ export function JobFilters({
           </button>
         </div>
       </div>
+
+      {pendingLimit !== null && (
+        <ConfirmDialog
+          title="Load more jobs?"
+          message={`Loading ${pendingLimit} jobs is slow and puts extra load on the CI. Continue?`}
+          confirmLabel="Load"
+          onConfirm={() => {
+            onLimit(pendingLimit);
+            setPendingLimit(null);
+          }}
+          onCancel={() => setPendingLimit(null)}
+        />
+      )}
     </section>
   );
 }
