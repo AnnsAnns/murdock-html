@@ -168,6 +168,16 @@ describe('estimatedRuntime', () => {
     ).toBe(7200);
   });
 
+  it('is long for nightlies', () => {
+    expect(estimatedRuntime({ ref: 'refs/heads/master', env: { NIGHTLY: '1' } })).toBe(7200);
+  });
+
+  it('lets a full build win over a skip-compile-test label', () => {
+    expect(
+      estimatedRuntime({ env: { CI_PULL_LABELS: 'CI: full build;CI: skip compile test' } }),
+    ).toBe(7200);
+  });
+
   it('defaults to a normal build', () => {
     expect(estimatedRuntime({ env: { CI_PULL_LABELS: 'CI: ready for build' } })).toBe(900);
   });
@@ -208,6 +218,23 @@ describe('estimateQueuedStarts', () => {
     const queued: QueueJob = { uid: 'q', state: 'queued', creation_time: 2 };
     const starts = estimateQueuedStarts([running, queued], now);
     expect(starts.get('q')).toBe(now + (900 - 60) * 1000);
+  });
+
+  it('counts a running job before a queued job created earlier', () => {
+    // A fasttracked queued job can predate the running one, but the running
+    // job still holds the worker, so the queue starts after it finishes.
+    const queued: QueueJob = { uid: 'q', state: 'queued', creation_time: 1 };
+    const running: QueueJob = { uid: 'r', state: 'running', creation_time: 2, status: { eta: 60 } };
+    const starts = estimateQueuedStarts([queued, running], now);
+    expect(starts.get('q')).toBe(now + 60 * 1000);
+  });
+
+  it('orders the queued jobs by creation time', () => {
+    const first: QueueJob = { uid: 'first', state: 'queued', creation_time: 1 };
+    const second: QueueJob = { uid: 'second', state: 'queued', creation_time: 2 };
+    const starts = estimateQueuedStarts([second, first], now);
+    expect(starts.get('first')).toBe(now);
+    expect(starts.get('second')).toBe(now + 900 * 1000);
   });
 
   it('ignores jobs that are neither running nor queued', () => {

@@ -40,8 +40,11 @@ import type {
   QueryParams,
 } from '../types';
 
-// How many running/queued jobs to look at when estimating queued start times.
+// How many queued jobs to look at when estimating queued start times.
 const QUEUE_LOOKAHEAD = 100;
+// Running jobs are few, but they are the head of the queue: fetch them on
+// their own so a long queue cannot push them past the page limit.
+const RUNNING_LIMIT = 25;
 
 export function JobListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -89,15 +92,20 @@ export function JobListPage() {
     const controller = new AbortController();
     setRefreshing(true);
 
-    const queueQuery = `limit=${QUEUE_LOOKAHEAD}&states=running+queued`;
     const jobsRequest = getJobs(apiQuery, controller.signal);
-    const queueRequest = getJobs(queueQuery, controller.signal).catch(() => null);
+    const runningRequest = getJobs(`limit=${RUNNING_LIMIT}&states=running`, controller.signal).catch(
+      () => [] as Job[],
+    );
+    const queuedRequest = getJobs(
+      `limit=${QUEUE_LOOKAHEAD}&states=queued`,
+      controller.signal,
+    ).catch(() => null);
 
-    Promise.all([jobsRequest, queueRequest])
-      .then(([jobList, queueList]) => {
+    Promise.all([jobsRequest, runningRequest, queuedRequest])
+      .then(([jobList, runningList, queuedList]) => {
         withViewTransition(() => {
           setJobs(jobList);
-          if (queueList) setQueue(queueList);
+          if (queuedList) setQueue([...runningList, ...queuedList]);
           setLoaded(true);
           setRefreshing(false);
         });
@@ -208,9 +216,12 @@ export function JobListPage() {
     return list;
   }, [jobs, params.type, params.labels, params.search]);
 
-  // The dashboard groups the (filtered) job stream into three panels.
+  // The dashboard groups the (filtered) job stream into three panels. The
+  // queue is worked oldest-first, so the next job to run heads the list.
   const running = visibleJobs.find((job) => job.state === 'running');
-  const queued = visibleJobs.filter((job) => job.state === 'queued');
+  const queued = visibleJobs
+    .filter((job) => job.state === 'queued')
+    .sort((a, b) => (a.creation_time ?? 0) - (b.creation_time ?? 0));
   const past = visibleJobs.filter((job) => FINISHED_STATES.includes(job.state));
   const hasMore = jobs.length >= Number(params.limit);
 

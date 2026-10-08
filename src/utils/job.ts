@@ -255,10 +255,14 @@ const FULL_BUILD_RUNTIME = 2 * 60 * 60;
  */
 export function estimatedRuntime(job: Pick<Job, 'env' | 'ref'>): number {
   const labels = job.env?.CI_PULL_LABELS ?? '';
-  if (labels.includes('CI: skip compile test')) return SKIP_COMPILE_TEST_RUNTIME;
+  // The two labels are independent, so a job can carry both. A full build is
+  // the heavier instruction, and the safer estimate, so it wins.
   if (labels.includes('CI: full build')) return FULL_BUILD_RUNTIME;
+  if (labels.includes('CI: skip compile test')) return SKIP_COMPILE_TEST_RUNTIME;
   const ref = job.ref ?? job.env?.CI_BUILD_REF ?? '';
   if (isMergeQueue(ref)) return FULL_BUILD_RUNTIME;
+  // Nightlies build and test the whole tree, so they take about as long.
+  if (isNightly(job.env)) return FULL_BUILD_RUNTIME;
   return NORMAL_RUNTIME;
 }
 
@@ -275,22 +279,26 @@ function remainingRuntime(job: QueueJob, now: number): number {
 
 /**
  * Estimated start time (ms since epoch) for every queued job, assuming the
- * queue is worked through in order. Each job ahead contributes its remaining
- * runtime: a running job its live `status.eta`, a queued one its estimated
- * runtime derived from the CI flags. Returns a Map keyed by uid.
+ * queue is worked through one job at a time. Anything already running holds
+ * the worker, so it is counted first even if a queued job was created before
+ * it (a fasttracked job jumps the queue). The queued jobs then follow in
+ * creation order, each contributing its estimated runtime. Keyed by uid.
  */
 export function estimateQueuedStarts(jobs: QueueJob[], now: number = Date.now()): Map<string, number> {
   const starts = new Map<string, number>();
-  const ordered = [...jobs].sort((a, b) => (a.creation_time ?? 0) - (b.creation_time ?? 0));
 
   let cursor = now;
-  for (const job of ordered) {
-    if (job.state === 'running') {
-      cursor += remainingRuntime(job, now) * 1000;
-    } else if (job.state === 'queued') {
-      starts.set(job.uid, cursor);
-      cursor += remainingRuntime(job, now) * 1000;
-    }
+  for (const job of jobs) {
+    if (job.state === 'running') cursor += remainingRuntime(job, now) * 1000;
+  }
+
+  const queued = jobs
+    .filter((job) => job.state === 'queued')
+    .sort((a, b) => (a.creation_time ?? 0) - (b.creation_time ?? 0));
+
+  for (const job of queued) {
+    starts.set(job.uid, cursor);
+    cursor += remainingRuntime(job, now) * 1000;
   }
 
   return starts;

@@ -285,6 +285,34 @@ describe('JobListPage', () => {
     );
   });
 
+  it('lists queued jobs oldest first, so the next to run is on top', async () => {
+    const older: Job = {
+      ...job,
+      uid: 'older',
+      state: 'queued',
+      creation_time: 1700000000,
+      start_time: 0,
+      commit: { ...job.commit, message: 'queued: older' },
+    };
+    const newer: Job = {
+      ...job,
+      uid: 'newer',
+      state: 'queued',
+      creation_time: 1700000100,
+      start_time: 0,
+      commit: { ...job.commit, message: 'queued: newer' },
+    };
+    // The API hands the jobs back newest first.
+    fetchMock.mockImplementation((url: RequestInfo | URL) =>
+      String(url).includes('/jobs') ? jsonResponse([newer, older]) : Promise.reject(),
+    );
+
+    renderPage();
+
+    const titles = (await screen.findAllByText(/master @ queued:/)).map((el) => el.textContent);
+    expect(titles).toEqual(['master @ queued: older', 'master @ queued: newer']);
+  });
+
   it('shows the empty state when there are no jobs', async () => {
     fetchMock.mockImplementation((url: RequestInfo | URL) =>
       String(url).includes('/jobs') ? jsonResponse([]) : Promise.reject(new Error('unexpected')),
