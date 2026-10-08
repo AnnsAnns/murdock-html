@@ -85,9 +85,9 @@
 
   /* Ref labels: each kind of external reference gets its own colour. */
   --ref-pr: #2563eb;
-  --ref-merge-queue: #ea580c;
-  --ref-branch: #0d9488;
-  --ref-tag: #a16207;
+  --ref-merge-queue: #c2410c;
+  --ref-branch: #374151;
+  --ref-tag: #0f766e;
   --ref-commit: #64748b;
 
   /* PR state badge (icon fill) and the ink drawn on top of it. "Open" is a
@@ -122,9 +122,9 @@
 
     /* Ref labels need lighter inks to stay readable on the dark cards. */
     --ref-pr: #8ab4f8;
-    --ref-merge-queue: #fb923c;
-    --ref-branch: #5eead4;
-    --ref-tag: #facc15;
+    --ref-merge-queue: #e39a63;
+    --ref-branch: #d1d5db;
+    --ref-tag: #7fccc0;
     --ref-commit: #a8b0bd;
 
     --pr-open: #67e8f9;
