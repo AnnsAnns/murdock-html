@@ -10,11 +10,6 @@ export function jobPullNumber(job: Pick<Job, 'prinfo' | 'env'>): number | null {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-/** Native boards run tests without flashing; everything else is flashed first. */
-function isNative(target: string): boolean {
-  return target.startsWith('native');
-}
-
 /** How the code is checked out before the build. */
 export type CheckoutMethod = 'gh' | 'git' | 'build';
 
@@ -29,15 +24,13 @@ export interface ReproOption {
 /**
  * The `make` invocation that builds (or flashes and tests) one result. It
  * mirrors RIOT's `.murdock`: environment variables first, then `make` in the
- * application folder, with `RIOT_CI_BUILD=1` as CI exports it. A build runs
- * `all`; a test flashes and runs the app, except on native boards, which only
- * need `test`.
+ * application folder, with `RIOT_CI_BUILD=1` as CI exports it.
  */
 export function makeCommand(
   result: Pick<ResultItem, 'application' | 'target' | 'toolchain'>,
   kind: string,
 ): string {
-  const goal = kind === 'tests' ? (isNative(result.target) ? 'test' : 'flash test') : 'all';
+  const goal = kind === 'tests' ? 'all flash test' : 'all';
   return `BOARD=${result.target} TOOLCHAIN=${result.toolchain} RIOT_CI_BUILD=1 make -C ${result.application} ${goal}`;
 }
 

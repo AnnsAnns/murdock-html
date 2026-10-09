@@ -32,15 +32,15 @@ describe('makeCommand', () => {
     );
   });
 
-  it('flashes and tests on hardware', () => {
+  it('builds, flashes and tests on hardware', () => {
     expect(makeCommand(result, 'tests')).toBe(
-      'BOARD=samr21-xpro TOOLCHAIN=gnu RIOT_CI_BUILD=1 make -C tests/net/foo flash test',
+      'BOARD=samr21-xpro TOOLCHAIN=gnu RIOT_CI_BUILD=1 make -C tests/net/foo all flash test',
     );
   });
 
-  it('only runs the test on native boards', () => {
+  it('uses the same goal on native boards (`flash` is a no-op)', () => {
     expect(makeCommand({ ...result, target: 'native64' }, 'tests')).toBe(
-      'BOARD=native64 TOOLCHAIN=gnu RIOT_CI_BUILD=1 make -C tests/net/foo test',
+      'BOARD=native64 TOOLCHAIN=gnu RIOT_CI_BUILD=1 make -C tests/net/foo all flash test',
     );
   });
 });
@@ -87,7 +87,7 @@ describe('gitCheckout', () => {
 
 describe('reproduceOptions', () => {
   const result = { application: 'tests/net/foo', target: 'native64', toolchain: 'gnu' };
-  const make = 'BOARD=native64 TOOLCHAIN=gnu RIOT_CI_BUILD=1 make -C tests/net/foo test';
+  const make = 'BOARD=native64 TOOLCHAIN=gnu RIOT_CI_BUILD=1 make -C tests/net/foo all flash test';
 
   it('offers git, gh and build for a PR, each as a single command', () => {
     const options = reproduceOptions(result, 'tests', { prinfo: { number: 12321 } });
