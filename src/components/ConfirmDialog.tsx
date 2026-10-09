@@ -1,6 +1,7 @@
-import { useEffect, useId } from 'react';
+import { useId } from 'react';
 import styles from './ConfirmDialog.module.css';
 import controls from '../styles/controls.module.css';
+import { Dialog } from './Dialog';
 
 interface ConfirmDialogProps {
   title: string;
@@ -22,40 +23,24 @@ export function ConfirmDialog({
 }: ConfirmDialogProps) {
   const titleId = useId();
 
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onCancel();
-    };
-    document.addEventListener('keydown', onKeyDown);
-    return () => document.removeEventListener('keydown', onKeyDown);
-  }, [onCancel]);
-
   return (
-    <div className={styles.backdrop} onClick={onCancel}>
-      <div
-        className={styles.dialog}
-        role="alertdialog"
-        aria-modal="true"
-        aria-labelledby={titleId}
-        onClick={(event) => event.stopPropagation()}
-      >
-        <h2 id={titleId} className={styles.title}>
-          {title}
-        </h2>
-        <p className={styles.message}>{message}</p>
-        <div className={styles.actions}>
-          <button
-            type="button"
-            className={`${controls.btn} ${controls.btnGhost}`}
-            onClick={onCancel}
-          >
-            {cancelLabel}
-          </button>
-          <button type="button" className={controls.btn} onClick={onConfirm}>
-            {confirmLabel}
-          </button>
-        </div>
+    <Dialog role="alertdialog" labelledBy={titleId} onClose={onCancel} className={styles.dialog}>
+      <h2 id={titleId} className={styles.title}>
+        {title}
+      </h2>
+      <p className={styles.message}>{message}</p>
+      <div className={styles.actions}>
+        <button
+          type="button"
+          className={`${controls.btn} ${controls.btnGhost}`}
+          onClick={onCancel}
+        >
+          {cancelLabel}
+        </button>
+        <button type="button" className={controls.btn} onClick={onConfirm}>
+          {confirmLabel}
+        </button>
       </div>
-    </div>
+    </Dialog>
   );
 }

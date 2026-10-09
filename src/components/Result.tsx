@@ -5,19 +5,23 @@ import controls from '../styles/controls.module.css';
 import results from '../styles/results.module.css';
 import { stateIcon } from '../utils/state';
 import { Icon } from './Icon';
-import type { ResultItem } from '../types';
+import { ReproduceDialog } from './ReproduceDialog';
+import type { JobRefSource, ResultItem } from '../types';
 
 export interface ResultProps {
   uid: string;
   type: string;
   result: ResultItem;
   withApplication?: boolean;
+  /** Job the result belongs to, for the checkout recipes. */
+  job?: JobRefSource | null;
 }
 
 /** One target/toolchain result, expanding to its raw output. */
-export function Result({ uid, type, result, withApplication = false }: ResultProps) {
+export function Result({ uid, type, result, withApplication = false, job }: ResultProps) {
   const [output, setOutput] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
+  const [reproduce, setReproduce] = useState(false);
 
   const outputPath = getResultOutputUrl(uid, type, result.application, result.target, result.toolchain);
   const hasDetails = Boolean(
@@ -48,41 +52,52 @@ export function Result({ uid, type, result, withApplication = false }: ResultPro
 
   return (
     <div className={results.result}>
-      <button
-        type="button"
-        className={results.resultHead}
-        aria-expanded={open}
-        title={`${open ? 'Hide' : 'Show'} output`}
-        onClick={toggle}
-      >
-        {withApplication && (
-          <span className="row" style={{ gap: 6 }} data-state={state}>
-            <span className={controls.stateFg}>
-              <Icon name={stateIcon(state)} />
-            </span>
-            <span className="truncate">{result.application}</span>
-          </span>
-        )}
-        <span className="row" style={{ gap: 6 }}>
-          {!withApplication && (
-            <span className={controls.stateFg} data-state={state}>
-              <Icon name={stateIcon(state)} />
+      <div className={results.resultHead}>
+        <button
+          type="button"
+          className={results.resultToggle}
+          aria-expanded={open}
+          title={`${open ? 'Hide' : 'Show'} output`}
+          onClick={toggle}
+        >
+          {withApplication && (
+            <span className="row" style={{ gap: 6 }} data-state={state}>
+              <span className={controls.stateFg}>
+                <Icon name={stateIcon(state)} />
+              </span>
+              <span className="truncate">{result.application}</span>
             </span>
           )}
-          <Icon name="cpu" />
-          <span className="truncate">
-            {result.target}:{result.toolchain}
+          <span className="row" style={{ gap: 6 }}>
+            {!withApplication && (
+              <span className={controls.stateFg} data-state={state}>
+                <Icon name={stateIcon(state)} />
+              </span>
+            )}
+            <Icon name="cpu" />
+            <span className="truncate">
+              {result.target}:{result.toolchain}
+            </span>
           </span>
-        </span>
-        <span className="row" style={{ gap: 6 }}>
-          <Icon name="wrench" />
-          <span className="truncate">{result.worker}</span>
-        </span>
-        <span className="row" style={{ gap: 6 }}>
-          <Icon name="clock" />
-          {Number(result.runtime).toFixed(2)}s
-        </span>
-      </button>
+          <span className="row" style={{ gap: 6 }}>
+            <Icon name="wrench" />
+            <span className="truncate">{result.worker}</span>
+          </span>
+          <span className="row" style={{ gap: 6 }}>
+            <Icon name="clock" />
+            {Number(result.runtime).toFixed(2)}s
+          </span>
+        </button>
+        <button
+          type="button"
+          className={`${controls.iconBtn} ${results.resultReproduce}`}
+          title="Copy build instructions"
+          aria-label="Copy build instructions"
+          onClick={() => setReproduce(true)}
+        >
+          <Icon name="copy" />
+        </button>
+      </div>
 
       {open && (
         <div className={results.resultOutput}>
@@ -97,6 +112,15 @@ export function Result({ uid, type, result, withApplication = false }: ResultPro
           </a>
           <pre>{output ?? 'Loading…'}</pre>
         </div>
+      )}
+
+      {reproduce && (
+        <ReproduceDialog
+          result={result}
+          kind={type}
+          job={job}
+          onClose={() => setReproduce(false)}
+        />
       )}
     </div>
   );

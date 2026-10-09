@@ -100,6 +100,7 @@ function ResultsList({ kind, uid, results, failures, liveFailures, job, stats }:
                 type={kind}
                 withApplication
                 result={result}
+                job={job}
               />
             ))}
           </div>
@@ -121,6 +122,7 @@ function ResultsList({ kind, uid, results, failures, liveFailures, job, stats }:
                 type={kind}
                 withApplication
                 result={result}
+                job={job}
               />
             ))}
           </div>

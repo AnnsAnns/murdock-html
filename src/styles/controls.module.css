@@ -37,6 +37,10 @@
     color: inherit;
     border: 2px solid var(--border);
     box-shadow: none;
+
+    &:hover {
+      background: color-mix(in srgb, var(--box-color-standard) 14%, transparent);
+    }
   }
 
   &.btnDanger {

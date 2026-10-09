@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { getApplicationResults } from '../api/murdock';
+import { getApplicationResults, getJob } from '../api/murdock';
 import { Icon } from '../components/Icon';
 import { Result } from '../components/Result';
 import { Spinner } from '../components/Spinner';
@@ -8,7 +8,7 @@ import card from '../styles/card.module.css';
 import controls from '../styles/controls.module.css';
 import results from '../styles/results.module.css';
 import { useDocumentTitle } from '../hooks/useDocumentTitle';
-import type { ApplicationResults, ResultItem } from '../types';
+import type { ApplicationResults, Job, ResultItem } from '../types';
 
 interface ApplicationResultsPageProps {
   type: 'builds' | 'tests';
@@ -29,6 +29,7 @@ export function ApplicationResultsPage({ type }: ApplicationResultsPageProps) {
   const [data, setData] = useState<ApplicationResults | null>(null);
   const [filter, setFilter] = useState('');
   const [failuresFilter, setFailuresFilter] = useState('');
+  const [job, setJob] = useState<Job | null>(null);
 
   const typeLabel = type.charAt(0).toUpperCase() + type.slice(1);
   useDocumentTitle(`Murfrog - ${appPath} ${type}`);
@@ -41,6 +42,16 @@ export function ApplicationResultsPage({ type }: ApplicationResultsPageProps) {
       .catch(() => setData({}));
     return () => controller.abort();
   }, [uid, type, appPath]);
+
+  // The job supplies the checkout reference for the reproduce dialog.
+  useEffect(() => {
+    if (!uid) return undefined;
+    const controller = new AbortController();
+    getJob(uid, controller.signal)
+      .then(setJob)
+      .catch(() => setJob(null));
+    return () => controller.abort();
+  }, [uid]);
 
   const jobs: ResultItem[] = data?.jobs ?? [];
   const failures: ResultItem[] = data?.failures ?? [];
@@ -122,6 +133,7 @@ export function ApplicationResultsPage({ type }: ApplicationResultsPageProps) {
                     uid={uid ?? ''}
                     type={type}
                     result={result}
+                    job={job}
                   />
                 ))}
               </div>

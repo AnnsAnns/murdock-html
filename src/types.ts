@@ -19,6 +19,7 @@ export type IconName =
   | 'wrench'
   | 'fileText'
   | 'files'
+  | 'copy'
   | 'info'
   | 'chart'
   | 'terminal'
